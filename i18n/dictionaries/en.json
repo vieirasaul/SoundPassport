@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "title": "SoundPassport — Your music, documented",
+    "description": "Turn the music you love into a beautifully organized record of where you've been and what stayed with you."
+  },
+  "navigation": {
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact",
+    "homeLabel": "SoundPassport home",
+    "languageLabel": "Language"
+  },
+  "hero": {
+    "eyebrow": "Your music, documented",
+    "title": "Every song leaves a mark.",
+    "description": "SoundPassport turns the music you love into a beautifully organized record of where you've been, what you've heard, and what stayed with you.",
+    "cta": "Start your passport",
+    "comingSoon": "Coming soon"
+  },
+  "passport": {
+    "title": "Sound passport",
+    "number": "No. SP–0247",
+    "recentEntry": "Most recent entry",
+    "song": "Midnight City",
+    "artistAlbum": "M83 · Hurry Up, We're Dreaming",
+    "firstHeard": "First heard",
+    "place": "Paris, FR",
+    "year": "Year",
+    "genre": "Genre",
+    "genreValue": "Electronic",
+    "plays": "Plays",
+    "verified": "Entry verified",
+    "date": "July 24, 2026"
+  },
+  "footer": {
+    "tagline": "Built for people who listen closely.",
+    "features": "Catalog · Remember · Rediscover"
+  }
+}
