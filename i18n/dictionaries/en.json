@@ -34,6 +34,7 @@
   },
   "footer": {
     "tagline": "Built for people who listen closely.",
-    "features": "Catalog · Remember · Rediscover"
+    "features": "Catalog · Remember · Rediscover",
+    "madeBy": "Made by"
   }
 }

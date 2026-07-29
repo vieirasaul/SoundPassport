@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -26,25 +27,14 @@ export function Header({ locale, navigation }: HeaderProps) {
             className="flex items-center gap-2.5 text-[15px] font-semibold tracking-[-0.02em] text-ink"
             aria-label={navigation.homeLabel}
           >
-            <span className="grid size-8 place-items-center rounded-lg bg-ink text-white shadow-sm">
-              <svg
-                viewBox="0 0 24 24"
-                className="size-4"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M9 16.5V7.8l8-1.8v8.7M9 11l8-1.8"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <circle cx="6.5" cy="17" r="2.5" fill="currentColor" />
-                <circle cx="14.5" cy="15.2" r="2.5" fill="currentColor" />
-              </svg>
-            </span>
-            <span className="hidden sm:inline">SoundPassport</span>
+            <Image
+              src="/logo.png"
+              alt="SoundPassport"
+              width={1024}
+              height={1024}
+              priority
+              className="h-auto w-[72px] sm:w-[92px]"
+            />
           </Link>
 
           <div className="flex items-center">

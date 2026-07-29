@@ -34,6 +34,7 @@
   },
   "footer": {
     "tagline": "Hecho para quienes escuchan con atención.",
-    "features": "Cataloga · Recuerda · Redescubre"
+    "features": "Cataloga · Recuerda · Redescubre",
+    "madeBy": "Creado por"
   }
 }
