@@ -6,6 +6,10 @@
   --muted: #667085;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 .passport-booklet-sheet {
   visibility: hidden;
   pointer-events: none;
