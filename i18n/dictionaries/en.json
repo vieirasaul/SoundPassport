@@ -78,6 +78,30 @@
     "page": "Passport page",
     "rateLimited": "Spotify is temporarily limiting requests. Your connection is safe; try loading your music again in about {duration}."
   },
+  "about": {
+    "eyebrow": "About SoundPassport",
+    "title": "Your musical identity, documented like a journey.",
+    "introduction": "SoundPassport turns your listening taste into a playful digital passport filled with favorite songs, musical destinations, and details worth sharing.",
+    "steps": [
+      { "title": "Connect", "description": "Authorize access securely through Spotify's official sign-in page." },
+      { "title": "Discover", "description": "We read your listening affinities and turn them into meaningful musical details." },
+      { "title": "Explore", "description": "Browse a personal passport with anthems, destinations, and more pages as SoundPassport grows." }
+    ],
+    "privacyTitle": "Your account stays yours.",
+    "privacyDescription": "SoundPassport uses Spotify's official Web API and OAuth authorization flow. You choose which permissions to grant on Spotify's own authorization screen.",
+    "passwordDescription": "Your Spotify password is never shared with or seen by SoundPassport. Spotify handles the entire sign-in process and returns a limited access token instead.",
+    "permissionsDescription": "The app requests read-only access to your basic profile, top listening data, and recently played music. It cannot change your library, control playback, publish content, or access your payment details.",
+    "officialApiLink": "Read Spotify's official authorization documentation",
+    "faqEyebrow": "FAQ",
+    "faqTitle": "A few things you may be wondering.",
+    "faq": [
+      { "question": "What does SoundPassport create?", "answer": "It turns your listening data into a digital music passport with an identity page, fictional travel stamps, and your national anthems." },
+      { "question": "Does SoundPassport know my Spotify password?", "answer": "No. You sign in directly with Spotify. SoundPassport never receives, sees, or stores your Spotify password." },
+      { "question": "What information can the app access?", "answer": "Only the read-only information listed on Spotify's permission screen, currently your basic profile, top listening data, and recently played music." },
+      { "question": "Can SoundPassport modify my Spotify account?", "answer": "No. The requested permissions do not allow the app to edit your library, follow artists, create playlists, or control playback." },
+      { "question": "Why might my passport differ from Spotify Wrapped?", "answer": "Spotify provides affinity rankings for specific time ranges, not complete play counts or the same private calculations used by Wrapped. SoundPassport presents the data currently available through the official API." }
+    ]
+  },
   "footer": {
     "tagline": "Built for people who listen closely.",
     "features": "Catalog · Remember · Rediscover",
