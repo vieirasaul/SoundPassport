@@ -23,6 +23,32 @@
     "disconnect": "Disconnect",
     "error": "Spotify connection failed. Please try again."
   },
+  "demoPassport": {
+    "previewLabel": "Passport preview pages",
+    "identityTab": "Identity",
+    "travelTab": "Travel",
+    "anthemsTab": "Anthems",
+    "republic": "Republic of Music",
+    "passport": "Passport",
+    "citizen": "Citizen",
+    "nationality": "Nationality",
+    "anthem": "Official anthem",
+    "travelTitle": "Travel history",
+    "travelDescription": "Fictional destinations inspired by the sounds that shape your taste.",
+    "anthemsTitle": "National anthems",
+    "anthemsDescription": "The songs defining your current musical season.",
+    "destinations": [
+      { "flag": "🇫🇮", "name": "MetalLand" },
+      { "flag": "🇺🇸", "name": "Rock Republic" },
+      { "flag": "🇧🇷", "name": "MPBrasília" },
+      { "flag": "🌍", "name": "Synthapore" }
+    ],
+    "tracks": [
+      { "title": "Midnight City", "artist": "M83" },
+      { "title": "Everlong", "artist": "Foo Fighters" },
+      { "title": "Dreams", "artist": "Fleetwood Mac" }
+    ]
+  },
   "passport": {
     "title": "Sound passport",
     "number": "No. SP-0247",

@@ -10,6 +10,51 @@ html {
   scrollbar-gutter: stable;
 }
 
+.passport-demo-page {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: rotateY(-55deg);
+  transform-origin: left center;
+}
+
+#demo-identity:checked ~ .passport-demo-paper .passport-demo-identity,
+#demo-travel:checked ~ .passport-demo-paper .passport-demo-travel,
+#demo-anthems:checked ~ .passport-demo-paper .passport-demo-anthems {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  animation: demo-page-turn 420ms cubic-bezier(0.22, 0.75, 0.2, 1);
+  transform: none;
+}
+
+.passport-demo-tab {
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 0.5rem 0.75rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: 160ms ease;
+}
+
+.passport-demo-tab:hover {
+  background: rgb(0 0 0 / 0.04);
+  color: var(--foreground);
+}
+
+#demo-identity:checked ~ div .passport-demo-tab-identity,
+#demo-travel:checked ~ div .passport-demo-tab-travel,
+#demo-anthems:checked ~ div .passport-demo-tab-anthems {
+  background: #112a42;
+  color: #fff;
+}
+
+@keyframes demo-page-turn {
+  from { opacity: 0.25; transform: rotateY(-65deg); filter: brightness(0.75); }
+  to { opacity: 1; transform: rotateY(0); filter: brightness(1); }
+}
+
 .passport-booklet-sheet {
   visibility: hidden;
   pointer-events: none;
@@ -56,6 +101,9 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  #demo-identity:checked ~ .passport-demo-paper .passport-demo-identity,
+  #demo-travel:checked ~ .passport-demo-paper .passport-demo-travel,
+  #demo-anthems:checked ~ .passport-demo-paper .passport-demo-anthems,
   .passport-booklet-sheet:target {
     animation: none;
   }

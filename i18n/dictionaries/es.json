@@ -23,6 +23,32 @@
     "disconnect": "Desconectar",
     "error": "No se pudo conectar con Spotify. Inténtalo de nuevo."
   },
+  "demoPassport": {
+    "previewLabel": "Páginas de demostración del pasaporte",
+    "identityTab": "Identidad",
+    "travelTab": "Viajes",
+    "anthemsTab": "Himnos",
+    "republic": "República de la Música",
+    "passport": "Pasaporte",
+    "citizen": "Ciudadano",
+    "nationality": "Nacionalidad",
+    "anthem": "Himno oficial",
+    "travelTitle": "Historial de viajes",
+    "travelDescription": "Destinos ficticios inspirados en los sonidos que definen tu gusto musical.",
+    "anthemsTitle": "Himnos nacionales",
+    "anthemsDescription": "Las canciones que definen tu etapa musical actual.",
+    "destinations": [
+      { "flag": "🇫🇮", "name": "MetalLand" },
+      { "flag": "🇺🇸", "name": "República del Rock" },
+      { "flag": "🇧🇷", "name": "MPBrasília" },
+      { "flag": "🌍", "name": "Synthapore" }
+    ],
+    "tracks": [
+      { "title": "Midnight City", "artist": "M83" },
+      { "title": "Everlong", "artist": "Foo Fighters" },
+      { "title": "Dreams", "artist": "Fleetwood Mac" }
+    ]
+  },
   "passport": {
     "title": "Pasaporte sonoro",
     "number": "N.º SP-0247",
