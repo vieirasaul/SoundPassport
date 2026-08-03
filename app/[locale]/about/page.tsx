@@ -66,7 +66,7 @@ export default async function AboutPage({ params }: PageProps<"/[locale]/about">
           </div>
         </section>
       </main>
-      <Footer content={dictionary.footer} />
+      <Footer content={dictionary.footer} locale={locale} />
     </div>
   );
 }

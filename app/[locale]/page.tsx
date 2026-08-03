@@ -63,7 +63,7 @@ export default async function Home({
           <PassportDemo content={dictionary.demoPassport} />
         </section>
 
-        <Footer content={dictionary.footer} />
+        <Footer content={dictionary.footer} locale={locale} />
       </main>
     </div>
   );

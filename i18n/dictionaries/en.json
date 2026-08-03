@@ -139,9 +139,27 @@
     "githubDescription": "Explore my projects and development work.",
     "visitProfile": "Visit profile"
   },
+  "privacy": {
+    "eyebrow": "Privacy",
+    "title": "Clear, limited, and under your control.",
+    "introduction": "SoundPassport only requests the Spotify access needed to build your music passport. This page explains what happens to that access in the current version of the app.",
+    "updated": "Last updated August 2026",
+    "sections": [
+      { "title": "Official Spotify authorization", "description": "You connect through Spotify's official OAuth authorization page. SoundPassport never receives or sees your Spotify password.", "items": [] },
+      { "title": "Permissions requested", "description": "The current app requests read-only permissions. These permissions cannot be used to modify your Spotify account.", "items": ["Read your basic private profile", "Read your top artists and tracks", "Read your recently played music"] },
+      { "title": "How your session is handled", "description": "Spotify access and refresh tokens are encrypted and stored in an HTTP-only cookie in your browser. The cookie is unavailable to page scripts and is configured to expire after 30 days.", "items": [] },
+      { "title": "Listening data and storage", "description": "SoundPassport retrieves listening data when generating your passport. It does not maintain a database of user profiles or listening histories, and generated passports are not made public automatically.", "items": [] },
+      { "title": "Disconnecting and revoking access", "description": "Disconnecting deletes the SoundPassport session cookie from your browser. You can separately revoke the app's authorization at any time from your Spotify account apps page.", "items": [] }
+    ],
+    "controlTitle": "You can revoke access at any time.",
+    "controlDescription": "Manage authorized apps directly through Spotify or contact Saul if you have a privacy question about SoundPassport.",
+    "manageSpotify": "Manage Spotify apps",
+    "contact": "Ask a privacy question"
+  },
   "footer": {
     "tagline": "Built for people who listen closely.",
     "features": "Catalog · Remember · Rediscover",
-    "madeBy": "Made by"
+    "madeBy": "Made by",
+    "privacy": "Privacy"
   }
 }

@@ -139,9 +139,27 @@
     "githubDescription": "Explora mis proyectos y mi trabajo de desarrollo.",
     "visitProfile": "Visitar perfil"
   },
+  "privacy": {
+    "eyebrow": "Privacidad",
+    "title": "Clara, limitada y bajo tu control.",
+    "introduction": "SoundPassport solo solicita el acceso a Spotify necesario para crear tu pasaporte musical. Esta página explica qué sucede con ese acceso en la versión actual de la aplicación.",
+    "updated": "Última actualización en agosto de 2026",
+    "sections": [
+      { "title": "Autorización oficial de Spotify", "description": "Te conectas mediante la página oficial de autorización OAuth de Spotify. SoundPassport nunca recibe ni ve tu contraseña.", "items": [] },
+      { "title": "Permisos solicitados", "description": "La aplicación solicita permisos de solo lectura. No pueden utilizarse para modificar tu cuenta de Spotify.", "items": ["Leer tu perfil privado básico", "Leer tus artistas y canciones principales", "Leer tu música reproducida recientemente"] },
+      { "title": "Cómo se gestiona tu sesión", "description": "Los tokens de acceso y actualización de Spotify se cifran y almacenan en una cookie HTTP-only en tu navegador. Los scripts de la página no pueden acceder a ella y caduca después de 30 días.", "items": [] },
+      { "title": "Datos musicales y almacenamiento", "description": "SoundPassport obtiene tus datos musicales al generar el pasaporte. Actualmente no mantiene una base de datos de perfiles o historiales y no publica los pasaportes automáticamente.", "items": [] },
+      { "title": "Desconexión y revocación", "description": "Desconectarte elimina la cookie de sesión de SoundPassport de tu navegador. También puedes revocar la autorización en cualquier momento desde la página de aplicaciones de tu cuenta de Spotify.", "items": [] }
+    ],
+    "controlTitle": "Puedes revocar el acceso en cualquier momento.",
+    "controlDescription": "Gestiona las aplicaciones autorizadas directamente desde Spotify o contacta con Saul si tienes alguna pregunta sobre privacidad.",
+    "manageSpotify": "Gestionar apps de Spotify",
+    "contact": "Hacer una pregunta"
+  },
   "footer": {
     "tagline": "Hecho para quienes escuchan con atención.",
     "features": "Cataloga · Recuerda · Redescubre",
-    "madeBy": "Creado por"
+    "madeBy": "Creado por",
+    "privacy": "Privacidad"
   }
 }

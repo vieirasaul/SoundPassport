@@ -263,7 +263,7 @@ export default async function PassportPage({
           </form>
         </div>
       </main>
-      <Footer content={dictionary.footer} />
+      <Footer content={dictionary.footer} locale={locale} />
     </div>
   );
 }

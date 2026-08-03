@@ -59,7 +59,7 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
           </div>
         </section>
       </main>
-      <Footer content={dictionary.footer} />
+      <Footer content={dictionary.footer} locale={locale} />
     </div>
   );
 }

@@ -1,15 +1,24 @@
+import Link from "next/link";
+
+import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/get-dictionary";
 
 type FooterProps = {
   content: Dictionary["footer"];
+  locale: Locale;
 };
 
-export function Footer({ content }: FooterProps) {
+export function Footer({ content, locale }: FooterProps) {
   return (
     <footer className="mx-auto mt-auto w-full max-w-7xl px-6 pb-10 lg:px-8">
       <div className="flex flex-col gap-3 border-t border-black/[0.06] pt-6 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
         <p>{content.tagline}</p>
-        <p>{content.features}</p>
+        <div className="flex items-center gap-4">
+          <p>{content.features}</p>
+          <Link href={`/${locale}/privacy`} className="font-medium text-ink underline decoration-black/20 underline-offset-4 transition hover:decoration-black">
+            {content.privacy}
+          </Link>
+        </div>
       </div>
       <div className="mt-9 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-muted">
         <span>{content.madeBy} Saul Vieira</span>
