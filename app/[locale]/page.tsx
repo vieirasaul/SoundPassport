@@ -1,46 +1,62 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { SpotifyAuth } from "@/components/spotify-auth";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { isLocale } from "@/i18n/config";
+import {
+  getSpotifySession,
+  hasRequiredSpotifyScopes,
+} from "@/lib/auth/spotify";
 
-export default async function Home({ params }: PageProps<"/[locale]">) {
+export default async function Home({
+  params,
+  searchParams,
+}: PageProps<"/[locale]">) {
   const { locale } = await params;
+  const query = await searchParams;
 
   if (!isLocale(locale)) {
     notFound();
   }
 
   const dictionary = await getDictionary(locale);
+  const session = await getSpotifySession();
+
+  if (session && hasRequiredSpotifyScopes(session)) {
+    redirect(`/${locale}/passport`);
+  }
 
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <Header locale={locale} navigation={dictionary.navigation} />
 
-      <main>
+      <main className="flex flex-1 flex-col">
         <section className="mx-auto grid max-w-7xl items-center gap-16 px-6 py-24 sm:py-32 lg:grid-cols-[1fr_0.82fr] lg:px-8 lg:py-36">
           <div className="max-w-2xl">
             <p className="mb-6 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
               <span className="block h-px w-6 bg-muted/60" />
               {dictionary.hero.eyebrow}
             </p>
-            <h1 className="text-balance text-5xl font-semibold leading-[1.04] tracking-[-0.055em] text-ink sm:text-6xl lg:text-[72px]">
+            <h1 className="text-balance text-4xl font-semibold leading-[1.08] tracking-[-0.05em] text-ink sm:text-5xl lg:text-[56px]">
               {dictionary.hero.title}
             </h1>
             <p className="mt-7 max-w-xl text-pretty text-lg leading-8 text-muted sm:text-xl sm:leading-9">
               {dictionary.hero.description}
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-4">
-              <button
-                type="button"
-                className="rounded-xl bg-ink px-5 py-3 text-sm font-semibold text-white shadow-[0_1px_2px_rgba(17,24,39,0.2)] transition hover:-translate-y-0.5 hover:bg-[#252d3a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-              >
-                {dictionary.hero.cta}
-              </button>
-              <span className="text-sm text-muted">
-                {dictionary.hero.comingSoon}
-              </span>
+              <SpotifyAuth
+                locale={locale}
+                session={null}
+                labels={dictionary.auth}
+              />
             </div>
+            {query.auth === "error" ? (
+              <p role="alert" className="mt-4 text-sm text-red-600">
+                {dictionary.auth.error}
+              </p>
+            ) : null}
           </div>
 
           <div className="relative mx-auto w-full max-w-[480px] lg:mr-0">
@@ -132,47 +148,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           </div>
         </section>
 
-        <div className="mx-auto max-w-7xl px-6 pb-10 lg:px-8">
-          <div className="flex flex-col gap-3 border-t border-black/[0.06] pt-6 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
-            <p>{dictionary.footer.tagline}</p>
-            <p>{dictionary.footer.features}</p>
-          </div>
-          <div className="mt-9 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-muted">
-            <span>{dictionary.footer.madeBy} Saul Vieira</span>
-            <a
-              href="https://github.com/vieirasaul"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Saul Vieira on GitHub"
-              className="inline-flex rounded-md p-1 text-ink transition hover:bg-black/[0.05] hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className="size-5"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path d="M12 .7a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2.23c-3.22.7-3.9-1.37-3.9-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.77 2.72 1.26 3.38.96.1-.75.4-1.26.74-1.55-2.57-.3-5.27-1.29-5.27-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.16 1.18a10.96 10.96 0 0 1 5.75 0c2.2-1.49 3.16-1.18 3.16-1.18.63 1.59.23 2.76.11 3.05a4.46 4.46 0 0 1 1.19 3.09c0 4.42-2.71 5.39-5.29 5.68.42.36.79 1.06.79 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z" />
-              </svg>
-            </a>
-            <a
-              href="https://www.linkedin.com/in/vieirasaul/"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Saul Vieira on LinkedIn"
-              className="inline-flex rounded-md p-1 text-ink transition hover:bg-black/[0.05] hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className="size-5"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V8.98h3.42v1.57h.05c.47-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.29ZM5.32 7.41a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13Zm1.78 13.04H3.54V8.98H7.1v11.47Z" />
-              </svg>
-            </a>
-          </div>
-        </div>
+        <Footer content={dictionary.footer} />
       </main>
     </div>
   );

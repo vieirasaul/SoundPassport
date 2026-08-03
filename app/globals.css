@@ -30,3 +30,23 @@ body {
   background: #111827;
   color: #ffffff;
 }
+
+@keyframes passport-loading {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(200%);
+  }
+}
+
+.passport-loading-bar {
+  animation: passport-loading 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .passport-loading-bar {
+    animation: none;
+    transform: translateX(50%);
+  }
+}

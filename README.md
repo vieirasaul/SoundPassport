@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SoundPassport
 
-## Getting Started
+SoundPassport turns Spotify listening data into a personal, passport-style music record.
 
-First, run the development server:
+## Local development
+
+Install dependencies and copy the environment template:
+
+```bash
+npm install
+cp .env.example .env.local
+```
+
+Create an application in the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard), then add this exact redirect URI to its allowlist:
+
+```text
+http://127.0.0.1:3000/api/auth/callback
+```
+
+Add the Spotify client ID to `.env.local` and generate the session encryption secret:
+
+```bash
+openssl rand -base64 32
+```
+
+Run the app:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000). Spotify does not accept `localhost` as an HTTP redirect host, and opening the app under a different hostname would prevent the temporary OAuth cookies from reaching the callback.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+For production, register the production HTTPS callback in Spotify and set `SPOTIFY_REDIRECT_URI` to that exact URL.
+Set `APP_URL` to the matching canonical application origin (for example, `https://soundpassport.example.com`) so login, refresh, and logout never switch hosts.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Authentication
 
-## Learn More
+Authentication uses Spotify Authorization Code with PKCE. OAuth state and the PKCE verifier are stored in short-lived HTTP-only cookies. Spotify access and refresh tokens are stored inside an AES-GCM encrypted, HTTP-only session cookie and are never exposed to client JavaScript.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The app requests `user-read-private`, `user-top-read`, and `user-read-recently-played`. These permissions provide the connected profile, top tracks across Spotify's supported time ranges, and the latest listening-history entries used to build the passport.
