@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "title": "SoundPassport — Sua música, documentada",
+    "title": "SoundPassport | Sua música, documentada",
     "description": "Transforme as músicas que você ama em um registro organizado dos lugares por onde passou e do que permaneceu com você."
   },
   "navigation": {
@@ -12,8 +12,8 @@
   },
   "hero": {
     "eyebrow": "Sua música, documentada",
-    "title": "Gere um lindo passaporte com seu histórico do Spotify em menos de 10 segundos.",
-    "description": "Conecte o Spotify e transforme suas faixas favoritas, descobertas recentes e identidade musical em um passaporte feito para compartilhar.",
+    "title": "Transforme seu histórico musical em um lindo passaporte da música em apenas dois cliques.",
+    "description": "Descubra os artistas, músicas e sons que definem sua identidade musical, documentados em um passaporte feito para compartilhar.",
     "cta": "Conectar com o Spotify",
     "comingSoon": "Em breve"
   },
@@ -25,7 +25,7 @@
   },
   "passport": {
     "title": "Passaporte sonoro",
-    "number": "Nº SP–0247",
+    "number": "Nº SP-0247",
     "recentEntry": "Registro mais recente",
     "song": "Midnight City",
     "artistAlbum": "M83 · Hurry Up, We're Dreaming",
@@ -69,7 +69,14 @@
     "openSpotify": "Abrir no Spotify",
     "empty": "O Spotify ainda não tem dados de escuta suficientes para esta seção.",
     "loadError": "Não foi possível carregar seus dados de escuta agora.",
-    "tryAgain": "Tentar novamente"
+    "tryAgain": "Tentar novamente",
+    "identityPage": "Página de identidade",
+    "travelHistoryDescription": "Destinos carimbados a partir das suas maiores afinidades musicais dos últimos seis meses.",
+    "anthemsPage": "Hinos nacionais",
+    "previousPage": "Anterior",
+    "nextPage": "Próxima",
+    "page": "Página do passaporte",
+    "rateLimited": "O Spotify está limitando as solicitações temporariamente. Sua conexão está segura; tente carregar suas músicas novamente em cerca de {duration}."
   },
   "footer": {
     "tagline": "Feito para quem escuta com atenção.",

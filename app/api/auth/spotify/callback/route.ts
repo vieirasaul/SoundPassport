@@ -6,6 +6,7 @@ import {
   getAppUrl,
   getSpotifyProfile,
   sealSpotifySession,
+  SpotifyRateLimitError,
   spotifyLocaleCookie,
   spotifySessionCookie,
   spotifyStateCookie,
@@ -43,7 +44,30 @@ export async function GET(request: NextRequest) {
       throw new Error("Spotify did not return a refresh token");
     }
 
-    const profile = await getSpotifyProfile(token.access_token);
+    let profile: Awaited<ReturnType<typeof getSpotifyProfile>>;
+
+    try {
+      profile = await getSpotifyProfile(token.access_token);
+    } catch (error) {
+      if (!(error instanceof SpotifyRateLimitError)) throw error;
+
+      const tokenDigest = await crypto.subtle.digest(
+        "SHA-256",
+        new TextEncoder().encode(token.access_token),
+      );
+      const fallbackId = Array.from(new Uint8Array(tokenDigest).slice(0, 8))
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join("");
+
+      console.warn(
+        `Spotify profile rate limited; preserving session (retry after ${error.retryAfter}s)`,
+      );
+      profile = {
+        account_id: fallbackId,
+        id: fallbackId,
+        display_name: "Spotify Listener",
+      };
+    }
     const session = await sealSpotifySession({
       accessToken: token.access_token,
       refreshToken: token.refresh_token,

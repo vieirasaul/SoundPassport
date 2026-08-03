@@ -186,17 +186,47 @@ export async function exchangeSpotifyCode(
   return response.json() as Promise<SpotifyTokenResponse>;
 }
 
-export async function getSpotifyProfile(accessToken: string) {
-  const response = await fetch("https://api.spotify.com/v1/me", {
-    headers: { Authorization: `Bearer ${accessToken}` },
-    cache: "no-store",
-  });
+export class SpotifyRateLimitError extends Error {
+  retryAfter: number;
 
-  if (!response.ok) {
+  constructor(retryAfter: number) {
+    super("Spotify API rate limit reached");
+    this.name = "SpotifyRateLimitError";
+    this.retryAfter = retryAfter;
+  }
+}
+
+function getRetryAfter(response: Response) {
+  const seconds = Number(response.headers.get("retry-after"));
+  return Number.isFinite(seconds) && seconds > 0 ? seconds : 1;
+}
+
+export async function getSpotifyProfile(accessToken: string) {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const response = await fetch("https://api.spotify.com/v1/me", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: "no-store",
+    });
+
+    if (response.ok) {
+      return response.json() as Promise<SpotifyProfileResponse>;
+    }
+
+    if (response.status === 429) {
+      const retryAfter = getRetryAfter(response);
+
+      if (attempt === 0 && retryAfter <= 2) {
+        await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
+        continue;
+      }
+
+      throw new SpotifyRateLimitError(retryAfter);
+    }
+
     throw new Error(`Spotify profile request failed with ${response.status}`);
   }
 
-  return response.json() as Promise<SpotifyProfileResponse>;
+  throw new SpotifyRateLimitError(1);
 }
 
 export async function refreshSpotifySession(session: SpotifySession) {

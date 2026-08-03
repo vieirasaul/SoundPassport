@@ -16,87 +16,64 @@ type TopTracksResponse = {
   items: SpotifyTrack[];
 };
 
-type SpotifyArtist = {
-  id: string;
-  name: string;
-  genres?: string[];
-};
+export class SpotifyDataRateLimitError extends Error {
+  retryAfter: number;
 
-type TopArtistsResponse = {
-  items: SpotifyArtist[];
-};
-
-type RecentlyPlayedResponse = {
-  items: Array<{
-    track: SpotifyTrack;
-    played_at: string;
-  }>;
-};
+  constructor(retryAfter: number) {
+    super(`Spotify API rate limited for ${retryAfter} seconds`);
+    this.name = "SpotifyDataRateLimitError";
+    this.retryAfter = retryAfter;
+  }
+}
 
 async function spotifyFetch<T>(path: string, accessToken: string) {
-  const response = await fetch(`https://api.spotify.com/v1${path}`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-    cache: "no-store",
-  });
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const response = await fetch(`https://api.spotify.com/v1${path}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: "no-store",
+    });
 
-  if (!response.ok) {
+    if (response.ok) {
+      return response.json() as Promise<T>;
+    }
+
+    if (response.status === 429) {
+      const retryAfter = Number(response.headers.get("retry-after"));
+      const waitSeconds = Number.isFinite(retryAfter) && retryAfter > 0
+        ? retryAfter
+        : 1;
+
+      if (attempt === 0 && waitSeconds <= 5) {
+        await new Promise((resolve) => setTimeout(resolve, waitSeconds * 1000));
+        continue;
+      }
+
+      throw new SpotifyDataRateLimitError(waitSeconds);
+    }
+
     throw new Error(`Spotify API request failed with ${response.status}`);
   }
 
-  return response.json() as Promise<T>;
+  throw new Error("Spotify API request failed after retry");
 }
 
 export async function getPassportData(accessToken: string) {
-  const [shortTerm, mediumTerm, longTerm, recentlyPlayed, topArtists] =
-    await Promise.all([
-      spotifyFetch<TopTracksResponse>(
-        "/me/top/tracks?time_range=short_term&limit=6",
-        accessToken,
+  const mediumTerm = await spotifyFetch<TopTracksResponse>(
+    "/me/top/tracks?time_range=medium_term&limit=6",
+    accessToken,
+  );
+  const topArtistNames = Array.from(
+    new Set(
+      mediumTerm.items.flatMap((track) =>
+        track.artists.map((artist) => artist.name),
       ),
-      spotifyFetch<TopTracksResponse>(
-        "/me/top/tracks?time_range=medium_term&limit=6",
-        accessToken,
-      ),
-      spotifyFetch<TopTracksResponse>(
-        "/me/top/tracks?time_range=long_term&limit=6",
-        accessToken,
-      ),
-      spotifyFetch<RecentlyPlayedResponse>(
-        "/me/player/recently-played?limit=10",
-        accessToken,
-      ),
-      spotifyFetch<TopArtistsResponse>(
-        "/me/top/artists?time_range=medium_term&limit=20",
-        accessToken,
-      ),
-    ]);
-
-  const seenTrackIds = new Set<string>();
-  const recent = recentlyPlayed.items.filter(({ track }) => {
-    if (seenTrackIds.has(track.id)) return false;
-    seenTrackIds.add(track.id);
-    return true;
-  });
-
-  const genreScores = new Map<string, number>();
-  topArtists.items.forEach((artist, index) => {
-    const weight = topArtists.items.length - index;
-    artist.genres?.forEach((genre) => {
-      genreScores.set(genre, (genreScores.get(genre) ?? 0) + weight);
-    });
-  });
-
-  const topGenres = [...genreScores.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 4)
-    .map(([genre]) => genre);
+    ),
+  ).slice(0, 4);
 
   return {
-    shortTerm: shortTerm.items,
     mediumTerm: mediumTerm.items,
-    longTerm: longTerm.items,
-    recent: recent.slice(0, 6),
-    topGenres,
-    topArtistNames: topArtists.items.slice(0, 4).map((artist) => artist.name),
+    longTerm: mediumTerm.items,
+    topGenres: [] as string[],
+    topArtistNames,
   };
 }

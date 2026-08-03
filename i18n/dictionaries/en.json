@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "title": "SoundPassport — Your music, documented",
+    "title": "SoundPassport | Your music, documented",
     "description": "Turn the music you love into a beautifully organized record of where you've been and what stayed with you."
   },
   "navigation": {
@@ -12,8 +12,8 @@
   },
   "hero": {
     "eyebrow": "Your music, documented",
-    "title": "Generate a beautiful passport from your Spotify listening history in under 10 seconds.",
-    "description": "Connect Spotify and instantly turn your favorite tracks, recent discoveries, and music identity into a passport worth sharing.",
+    "title": "Turn your listening history into a beautiful music passport in just two clicks.",
+    "description": "Discover the artists, songs, and sounds that define your musical identity, beautifully documented in a passport made for sharing.",
     "cta": "Connect with Spotify",
     "comingSoon": "Coming soon"
   },
@@ -25,7 +25,7 @@
   },
   "passport": {
     "title": "Sound passport",
-    "number": "No. SP–0247",
+    "number": "No. SP-0247",
     "recentEntry": "Most recent entry",
     "song": "Midnight City",
     "artistAlbum": "M83 · Hurry Up, We're Dreaming",
@@ -69,7 +69,14 @@
     "openSpotify": "Open on Spotify",
     "empty": "Spotify does not have enough listening data for this section yet.",
     "loadError": "We couldn't load your listening data right now.",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "identityPage": "Identity page",
+    "travelHistoryDescription": "Destinations stamped from your strongest listening affinities over the last six months.",
+    "anthemsPage": "National anthems",
+    "previousPage": "Previous",
+    "nextPage": "Next",
+    "page": "Passport page",
+    "rateLimited": "Spotify is temporarily limiting requests. Your connection is safe; try loading your music again in about {duration}."
   },
   "footer": {
     "tagline": "Built for people who listen closely.",
