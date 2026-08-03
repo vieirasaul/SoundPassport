@@ -44,7 +44,13 @@ export function proxy(request: NextRequest) {
   const firstSegment = pathname.split("/")[1];
 
   if (isLocale(firstSegment)) {
-    return NextResponse.next();
+    const response = NextResponse.next();
+    response.cookies.set(localeCookieName, firstSegment, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+    });
+    return response;
   }
 
   const locale = detectLocale(request);

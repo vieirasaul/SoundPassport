@@ -9,9 +9,10 @@ import type { Dictionary } from "@/i18n/get-dictionary";
 type HeaderProps = {
   locale: Locale;
   navigation: Dictionary["navigation"];
+  currentPath?: string;
 };
 
-export function Header({ locale, navigation }: HeaderProps) {
+export function Header({ locale, navigation, currentPath }: HeaderProps) {
   const links = [
     { label: navigation.home, href: `/${locale}` },
     { label: navigation.about, href: `/${locale}/about` },
@@ -47,6 +48,7 @@ export function Header({ locale, navigation }: HeaderProps) {
             <LanguageSwitcher
               locale={locale}
               label={navigation.languageLabel}
+              currentPath={currentPath}
             />
           </div>
         </div>

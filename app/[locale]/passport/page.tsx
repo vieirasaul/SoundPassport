@@ -241,7 +241,7 @@ export default async function PassportPage({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header locale={locale} navigation={dictionary.navigation} />
+      <Header locale={locale} navigation={dictionary.navigation} currentPath="/passport" />
       <main className="mx-auto w-full max-w-7xl flex-1 px-6 pb-12 lg:px-8">
         <section className="py-16 sm:py-24">
           <div className="mx-auto max-w-[520px] rounded-[30px] bg-[#081a2b] p-2 shadow-[0_38px_100px_rgba(8,26,43,0.3)]">
