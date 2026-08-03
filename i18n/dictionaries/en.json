@@ -102,6 +102,17 @@
       { "question": "Why might my passport differ from Spotify Wrapped?", "answer": "Spotify provides affinity rankings for specific time ranges, not complete play counts or the same private calculations used by Wrapped. SoundPassport presents the data currently available through the official API." }
     ]
   },
+  "contact": {
+    "eyebrow": "Contact",
+    "title": "Have an idea, question, or a song recommendation?",
+    "description": "SoundPassport is an independent project by Saul Vieira. If you found an issue, have feedback, or simply want to say hello, choose the channel that works best for you.",
+    "emailLabel": "Email",
+    "emailDescription": "The best option for questions, feedback, bug reports, and collaboration ideas.",
+    "emailAction": "Write an email",
+    "linkedinDescription": "Connect with me and follow my professional work.",
+    "githubDescription": "Explore my projects and development work.",
+    "visitProfile": "Visit profile"
+  },
   "footer": {
     "tagline": "Built for people who listen closely.",
     "features": "Catalog · Remember · Rediscover",

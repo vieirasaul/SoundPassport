@@ -102,6 +102,17 @@
       { "question": "¿Por qué mi pasaporte puede diferir de Spotify Wrapped?", "answer": "Spotify ofrece rankings de afinidad para periodos específicos, no conteos completos ni los cálculos privados de Wrapped. SoundPassport presenta los datos disponibles mediante la API oficial." }
     ]
   },
+  "contact": {
+    "eyebrow": "Contacto",
+    "title": "¿Tienes una idea, pregunta o recomendación musical?",
+    "description": "SoundPassport es un proyecto independiente de Saul Vieira. Si encontraste un problema, tienes alguna sugerencia o simplemente quieres saludar, elige el canal que prefieras.",
+    "emailLabel": "Correo electrónico",
+    "emailDescription": "La mejor opción para preguntas, sugerencias, informes de errores e ideas de colaboración.",
+    "emailAction": "Enviar un correo",
+    "linkedinDescription": "Conecta conmigo y sigue mi trabajo profesional.",
+    "githubDescription": "Explora mis proyectos y mi trabajo de desarrollo.",
+    "visitProfile": "Visitar perfil"
+  },
   "footer": {
     "tagline": "Hecho para quienes escuchan con atención.",
     "features": "Cataloga · Recuerda · Redescubre",
