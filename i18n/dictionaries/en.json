@@ -148,7 +148,7 @@
       { "title": "Official Spotify authorization", "description": "You connect through Spotify's official OAuth authorization page. SoundPassport never receives or sees your Spotify password.", "items": [] },
       { "title": "Permissions requested", "description": "The current app requests read-only permissions. These permissions cannot be used to modify your Spotify account.", "items": ["Read your basic private profile", "Read your top artists and tracks", "Read your recently played music"] },
       { "title": "How your session is handled", "description": "Spotify access and refresh tokens are encrypted and stored in an HTTP-only cookie in your browser. The cookie is unavailable to page scripts and is configured to expire after 30 days.", "items": [] },
-      { "title": "Listening data and storage", "description": "SoundPassport retrieves listening data when generating your passport. It does not maintain a database of user profiles or listening histories, and generated passports are not made public automatically.", "items": [] },
+      { "title": "Listening data and storage", "description": "SoundPassport retrieves listening data when generating your passport. Public artist names may be sent to MusicBrainz to obtain genre metadata; no Spotify token or account identifier is shared. The app does not maintain a database of user profiles or listening histories, and passports are not made public automatically.", "items": [] },
       { "title": "Disconnecting and revoking access", "description": "Disconnecting deletes the SoundPassport session cookie from your browser. You can separately revoke the app's authorization at any time from your Spotify account apps page.", "items": [] }
     ],
     "controlTitle": "You can revoke access at any time.",

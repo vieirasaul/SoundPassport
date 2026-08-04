@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Play } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 
 import { Header } from "@/components/header";
@@ -29,6 +30,8 @@ function getGenreFlag(genre: string) {
   if (normalized.includes("j-rock") || normalized.includes("japanese")) return "🇯🇵";
   if (normalized.includes("mpb") || normalized.includes("brazil")) return "🇧🇷";
   if (normalized.includes("swedish") || normalized.includes("melodic death")) return "🇸🇪";
+  if (normalized.includes("emo")) return "🇺🇸";
+  if (normalized.includes("punk") || normalized.includes("hardcore") || normalized.includes("core")) return "🇬🇧";
   if (normalized.includes("rock")) return "🇺🇸";
   if (normalized.includes("metal")) return "🇫🇮";
   if (normalized.includes("k-pop") || normalized.includes("korean")) return "🇰🇷";
@@ -43,7 +46,11 @@ function getGenreDestination(genre: string) {
   if (normalized.includes("death metal")) return "Death Metalvania";
   if (normalized.includes("black metal")) return "Blackmetalholm";
   if (normalized.includes("metal")) return "MetalLand";
+  if (normalized.includes("pop punk")) return "Pop Punk Province";
   if (normalized.includes("punk")) return "Punknapolis";
+  if (normalized.includes("hardcore")) return "Hardcore Harbor";
+  if (normalized.includes("emo")) return "Emo Empire";
+  if (normalized.includes("core")) return "Core County";
   if (normalized.includes("j-rock") || normalized.includes("japanese rock")) return "J-Rockyama";
   if (normalized.includes("rock")) return "Rock Republic";
   if (normalized.includes("mpb")) return "MPBrasília";
@@ -67,10 +74,10 @@ function getGenreDestination(genre: string) {
 
 function getArtistDestination(artist: string, index: number) {
   const destinations = [
-    `${artist}land`,
-    `Republic of ${artist}`,
-    `${artist} City`,
-    `Isles of ${artist}`,
+    `Embassy of ${artist}`,
+    `${artist} Consulate`,
+    `${artist} Territory`,
+    `${artist} Outpost`,
   ];
 
   return destinations[index % destinations.length];
@@ -79,6 +86,7 @@ function getArtistDestination(artist: string, index: number) {
 function getMusicNationality(genres: string[]) {
   const strongestGenre = genres[0]?.toLowerCase() ?? "";
   if (strongestGenre.includes("metal")) return "Metalhead";
+  if (strongestGenre.includes("punk") || strongestGenre.includes("hardcore")) return "Punk Native";
   if (strongestGenre.includes("rock")) return "Rock Citizen";
   if (strongestGenre.includes("pop")) return "Pop Native";
   if (strongestGenre.includes("hip hop") || strongestGenre.includes("rap")) return "Beat Dweller";
@@ -140,11 +148,19 @@ export default async function PassportPage({
     year: "numeric",
   }).format(new Date(session.issuedAt ?? session.expiresAt - 60 * 60 * 1000));
   const travelHistory = data?.topGenres.length
-    ? data.topGenres.map((genre) => ({
-        source: genre,
-        destination: getGenreDestination(genre),
-        flag: getGenreFlag(genre),
-      }))
+    ? data.topGenres
+        .map((genre) => ({
+          source: genre,
+          destination: getGenreDestination(genre),
+          flag: getGenreFlag(genre),
+        }))
+        .filter(
+          (place, index, places) =>
+            places.findIndex(
+              (candidate) => candidate.destination === place.destination,
+            ) === index,
+        )
+        .slice(0, 4)
     : (data?.topArtistNames ?? []).map((artist, index) => ({
         source: artist,
         destination: getArtistDestination(artist, index),
@@ -190,7 +206,7 @@ export default async function PassportPage({
                 </header>
                 <div className="mt-7 grid grid-cols-[112px_1fr] gap-5 border-t border-dashed border-[#f1d77f]/50 pt-7 sm:grid-cols-[150px_1fr] sm:gap-8">
                   <div>
-                    <div className="relative aspect-[4/5] overflow-hidden rounded-lg border border-[#f1d77f]/50 bg-[#183652]">
+                    <div className="relative aspect-square overflow-hidden rounded-lg border border-[#f1d77f]/50 bg-[#183652]">
                       {portraitArtwork ? <Image src={portraitArtwork.url} alt="" fill sizes="150px" className="object-cover opacity-90" /> : <div className="grid h-full place-items-center text-4xl">♫</div>}
                     </div>
                     <p className="mt-2 text-center font-mono text-[10px] tracking-[0.08em] text-[#f1d77f]/85">{passportNumber}</p>
@@ -229,7 +245,7 @@ export default async function PassportPage({
                       <span className="w-6 text-center font-mono text-sm text-[#e4cd8b]">{index + 1}</span>
                       <div className="relative size-14 shrink-0 overflow-hidden rounded-md bg-[#183652]">{track.album.images[0] ? <Image src={track.album.images[0].url} alt="" fill sizes="56px" className="object-cover" /> : null}</div>
                       <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-[#fff0bd]">{track.name}</p><p className="mt-1 truncate text-xs text-[#f1d77f]/70">{track.artists.map((artist) => artist.name).join(", ")}</p></div>
-                      <a href={track.external_urls.spotify} target="_blank" rel="noreferrer" aria-label={`${dictionary.passportPage.openSpotify}: ${track.name}`} className="grid size-9 shrink-0 place-items-center rounded-full bg-[#1DB954] text-white transition hover:scale-105"><span aria-hidden="true">▶</span></a>
+                      <a href={track.external_urls.spotify} target="_blank" rel="noreferrer" aria-label={`${dictionary.passportPage.openSpotify}: ${track.name}`} className="grid size-11 shrink-0 place-items-center rounded-full bg-[#1DB954] text-white transition hover:scale-105"><Play className="size-5 translate-x-px" fill="currentColor" strokeWidth={0} aria-hidden="true" /></a>
                     </li>
                   ))}
                 </ol>
