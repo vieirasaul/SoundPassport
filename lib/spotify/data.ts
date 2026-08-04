@@ -132,3 +132,71 @@ export async function getPassportData(accessToken: string) {
     topArtistNames,
   };
 }
+
+export type PassportData = Awaited<ReturnType<typeof getPassportData>>;
+
+type PassportCacheEntry = {
+  data: PassportData;
+  freshUntil: number;
+  staleUntil: number;
+};
+
+const globalPassportCache = globalThis as typeof globalThis & {
+  soundPassportCache?: Map<string, PassportCacheEntry>;
+  soundPassportRequests?: Map<string, Promise<PassportData>>;
+};
+
+const passportCache =
+  globalPassportCache.soundPassportCache ?? new Map<string, PassportCacheEntry>();
+const passportRequests =
+  globalPassportCache.soundPassportRequests ?? new Map<string, Promise<PassportData>>();
+
+globalPassportCache.soundPassportCache = passportCache;
+globalPassportCache.soundPassportRequests = passportRequests;
+
+const freshLifetime = 12 * 60 * 60 * 1000;
+const staleLifetime = 7 * 24 * 60 * 60 * 1000;
+
+export async function getCachedPassportData(
+  accountId: string,
+  accessToken: string,
+) {
+  const now = Date.now();
+  const cached = passportCache.get(accountId);
+
+  if (cached && cached.freshUntil > now) {
+    return { data: cached.data, source: "cache" as const };
+  }
+
+  const existingRequest = passportRequests.get(accountId);
+  if (existingRequest) {
+    return { data: await existingRequest, source: "spotify" as const };
+  }
+
+  const request = getPassportData(accessToken);
+  passportRequests.set(accountId, request);
+
+  try {
+    const data = await request;
+    const generatedAt = Date.now();
+    passportCache.set(accountId, {
+      data,
+      freshUntil: generatedAt + freshLifetime,
+      staleUntil: generatedAt + staleLifetime,
+    });
+    return { data, source: "spotify" as const };
+  } catch (error) {
+    if (cached && cached.staleUntil > now) {
+      console.warn("Serving stale passport data after Spotify request failed");
+      return { data: cached.data, source: "stale-cache" as const };
+    }
+    throw error;
+  } finally {
+    passportRequests.delete(accountId);
+  }
+}
+
+export function clearPassportCache(accountId: string) {
+  passportCache.delete(accountId);
+  passportRequests.delete(accountId);
+}

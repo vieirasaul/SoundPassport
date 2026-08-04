@@ -14,7 +14,8 @@ import {
   spotifySessionIsExpiring,
 } from "@/lib/auth/spotify";
 import {
-  getPassportData,
+  getCachedPassportData,
+  type PassportData,
   SpotifyDataRateLimitError,
 } from "@/lib/spotify/data";
 
@@ -125,11 +126,15 @@ export default async function PassportPage({
   }
 
   const dictionary = await getDictionary(locale);
-  let data: Awaited<ReturnType<typeof getPassportData>> | null = null;
+  let data: PassportData | null = null;
   let rateLimitRetryAfter: number | null = null;
 
   try {
-    data = await getPassportData(session.accessToken);
+    const passport = await getCachedPassportData(
+      session.profile.accountId,
+      session.accessToken,
+    );
+    data = passport.data;
   } catch (error) {
     if (error instanceof SpotifyDataRateLimitError) {
       rateLimitRetryAfter = error.retryAfter;

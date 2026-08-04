@@ -1,9 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { defaultLocale, isLocale } from "@/i18n/config";
-import { getAppUrl, spotifySessionCookie } from "@/lib/auth/spotify";
+import {
+  getAppUrl,
+  getSpotifySession,
+  spotifySessionCookie,
+} from "@/lib/auth/spotify";
+import { clearPassportCache } from "@/lib/spotify/data";
 
 export async function POST(request: NextRequest) {
+  const session = await getSpotifySession();
   const formData = await request.formData();
   const requestedLocale = formData.get("locale");
   const locale =
@@ -11,6 +17,8 @@ export async function POST(request: NextRequest) {
       ? requestedLocale
       : defaultLocale;
   const response = NextResponse.redirect(getAppUrl(request, `/${locale}`), 303);
+
+  if (session) clearPassportCache(session.profile.accountId);
 
   response.cookies.set(spotifySessionCookie, "", {
     httpOnly: true,
