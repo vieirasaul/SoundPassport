@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 
+import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { NavigationLinks } from "@/components/navigation-links";
 import type { Locale } from "@/i18n/config";
@@ -28,14 +28,7 @@ export function Header({ locale, navigation, currentPath }: HeaderProps) {
             className="flex items-center gap-2.5 text-[15px] font-semibold tracking-[-0.02em] text-ink"
             aria-label={navigation.homeLabel}
           >
-            <Image
-              src="/logo.png"
-              alt="SoundPassport"
-              width={1024}
-              height={1024}
-              priority
-              className="h-auto w-[72px] sm:w-[92px]"
-            />
+            <BrandLogo />
           </Link>
 
           <div className="flex items-center">
