@@ -12,12 +12,42 @@ export type SpotifyTrack = {
   external_urls: { spotify: string };
 };
 
+export type SpotifyArtist = {
+  id: string;
+  name: string;
+  genres: string[];
+  images: Array<{ url: string; width: number | null; height: number | null }>;
+  external_urls: { spotify: string };
+  popularity: number;
+};
+
 type TopTracksResponse = {
   items: SpotifyTrack[];
 };
 
+type TopArtistsResponse = {
+  items: SpotifyArtist[];
+};
+
+export type ArtistProfile = {
+  name: string;
+  type: string | null;
+  country: string | null;
+  area: string | null;
+  activeSince: string | null;
+  disambiguation: string | null;
+};
+
 type MusicBrainzArtistSearch = {
   artists?: Array<{
+    name: string;
+    score?: number;
+    type?: string;
+    country?: string;
+    area?: { name?: string };
+    "begin-area"?: { name?: string };
+    "life-span"?: { begin?: string };
+    disambiguation?: string;
     tags?: Array<{ name: string; count?: number }>;
   }>;
 };
@@ -111,25 +141,88 @@ async function getArtistGenres(artistNames: string[]) {
   }
 }
 
+async function getArtistProfile(artistName: string): Promise<ArtistProfile | null> {
+  const parameters = new URLSearchParams({
+    query: `artist:"${artistName.replace(/["\\]/g, "\\$&")}"`,
+    fmt: "json",
+    limit: "3",
+  });
+
+  try {
+    const response = await fetch(`https://musicbrainz.org/ws/2/artist/?${parameters}`, {
+      headers: {
+        "User-Agent": "SoundPassport/0.1 (https://github.com/vieirasaul/SoundPassport)",
+      },
+      next: { revalidate: 60 * 60 * 24 * 30 },
+    });
+
+    if (!response.ok) return null;
+
+    const result = (await response.json()) as MusicBrainzArtistSearch;
+    const exactMatch = result.artists?.find(
+      (artist) => artist.name.toLowerCase() === artistName.toLowerCase(),
+    );
+    const artist = exactMatch ?? result.artists?.[0];
+
+    if (!artist) return null;
+
+    return {
+      name: artist.name,
+      type: artist.type ?? null,
+      country: artist.country ?? null,
+      area: artist["begin-area"]?.name ?? artist.area?.name ?? null,
+      activeSince: artist["life-span"]?.begin?.slice(0, 4) ?? null,
+      disambiguation: artist.disambiguation ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function getPassportData(accessToken: string) {
-  const mediumTerm = await spotifyFetch<TopTracksResponse>(
-    "/me/top/tracks?time_range=medium_term&limit=6",
-    accessToken,
-  );
-  const topArtistNames = Array.from(
-    new Set(
-      mediumTerm.items.flatMap((track) =>
-        track.artists.map((artist) => artist.name),
+  const [mediumTerm, shortTermArtists, mediumTermArtists, longTermArtists] =
+    await Promise.all([
+      spotifyFetch<TopTracksResponse>(
+        "/me/top/tracks?time_range=medium_term&limit=6",
+        accessToken,
       ),
-    ),
-  ).slice(0, 4);
-  const topGenres = await getArtistGenres(topArtistNames);
+      spotifyFetch<TopArtistsResponse>(
+        "/me/top/artists?time_range=short_term&limit=10",
+        accessToken,
+      ),
+      spotifyFetch<TopArtistsResponse>(
+        "/me/top/artists?time_range=medium_term&limit=10",
+        accessToken,
+      ),
+      spotifyFetch<TopArtistsResponse>(
+        "/me/top/artists?time_range=long_term&limit=10",
+        accessToken,
+      ),
+    ]);
+  const topArtistNames = mediumTermArtists.items.slice(0, 4).map((artist) => artist.name);
+  const spotifyGenres = mediumTermArtists.items
+    .flatMap((artist) => artist.genres ?? [])
+    .filter((genre): genre is string =>
+      typeof genre === "string" && genre.trim().length > 0,
+    );
+  const topGenres = spotifyGenres.length
+    ? [...new Set(spotifyGenres)].slice(0, 12)
+    : await getArtistGenres(topArtistNames);
+  const headOfState = mediumTermArtists.items[0] ?? null;
+  const headOfStateProfile = headOfState
+    ? await getArtistProfile(headOfState.name)
+    : null;
 
   return {
     mediumTerm: mediumTerm.items,
     longTerm: mediumTerm.items,
     topGenres,
     topArtistNames,
+    shortTermArtists: shortTermArtists.items,
+    mediumTermArtists: mediumTermArtists.items,
+    longTermArtists: longTermArtists.items,
+    headOfState,
+    headOfStateProfile,
   };
 }
 
@@ -156,30 +249,32 @@ globalPassportCache.soundPassportRequests = passportRequests;
 
 const freshLifetime = 12 * 60 * 60 * 1000;
 const staleLifetime = 7 * 24 * 60 * 60 * 1000;
+const passportDataVersion = "v2";
 
 export async function getCachedPassportData(
   accountId: string,
   accessToken: string,
 ) {
   const now = Date.now();
-  const cached = passportCache.get(accountId);
+  const cacheKey = `${accountId}:${passportDataVersion}`;
+  const cached = passportCache.get(cacheKey);
 
   if (cached && cached.freshUntil > now) {
     return { data: cached.data, source: "cache" as const };
   }
 
-  const existingRequest = passportRequests.get(accountId);
+  const existingRequest = passportRequests.get(cacheKey);
   if (existingRequest) {
     return { data: await existingRequest, source: "spotify" as const };
   }
 
   const request = getPassportData(accessToken);
-  passportRequests.set(accountId, request);
+  passportRequests.set(cacheKey, request);
 
   try {
     const data = await request;
     const generatedAt = Date.now();
-    passportCache.set(accountId, {
+    passportCache.set(cacheKey, {
       data,
       freshUntil: generatedAt + freshLifetime,
       staleUntil: generatedAt + staleLifetime,
@@ -192,11 +287,13 @@ export async function getCachedPassportData(
     }
     throw error;
   } finally {
-    passportRequests.delete(accountId);
+    passportRequests.delete(cacheKey);
   }
 }
 
 export function clearPassportCache(accountId: string) {
   passportCache.delete(accountId);
   passportRequests.delete(accountId);
+  passportCache.delete(`${accountId}:${passportDataVersion}`);
+  passportRequests.delete(`${accountId}:${passportDataVersion}`);
 }

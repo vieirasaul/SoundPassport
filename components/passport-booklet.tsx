@@ -24,12 +24,14 @@ export function PassportBooklet({
           className={`passport-booklet-sheet col-start-1 row-start-1 ${page === 0 ? "passport-booklet-sheet-initial" : ""}`}
         >
           <div className="passport-booklet-paper rounded-[30px] bg-[#081a2b] p-2 shadow-[0_38px_100px_rgba(8,26,43,0.3)]">
-            <div className="min-h-[700px] overflow-hidden rounded-[24px] border border-[#e6c979]/60 bg-[#112a42] text-[#f1d77f]">
-              {content}
+            <div className="h-[700px] overflow-hidden rounded-[24px] border border-[#e6c979]/60 bg-[#112a42] text-[#f1d77f]">
+              <div className="h-full overflow-y-auto overscroll-contain [scrollbar-color:rgba(241,215,127,0.35)_transparent] [scrollbar-width:thin]">
+                {content}
+              </div>
             </div>
           </div>
 
-          <nav className="mt-6 flex items-center justify-between" aria-label={pageLabel}>
+          <nav className="mt-4 flex items-center justify-between" aria-label={pageLabel}>
             {page === 0 ? (
               <span className="rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-sm font-semibold text-ink opacity-35">← {previousLabel}</span>
             ) : (

@@ -1,18 +1,16 @@
+import Image from "next/image";
+
 export function BrandLogo() {
   return (
     <span className="inline-flex items-center gap-2.5" aria-hidden="true">
-      <svg
-        viewBox="0 0 60 60"
+      <Image
+        src="/favicon.svg"
+        alt=""
+        width={56}
+        height={56}
+        priority
         className="size-14 shrink-0"
-        fill="none"
-      >
-        <rect x="2" y="2" width="56" height="56" rx="16" fill="#112A42" />
-        <g transform="translate(4 2.5)">
-          <path d="M24 34V18l13-3v15" stroke="#F1D77F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          <circle cx="19.5" cy="35" r="5" fill="#F1D77F" />
-          <circle cx="32.5" cy="31" r="5" fill="#F1D77F" />
-        </g>
-      </svg>
+      />
 
       <span className="text-[15px] font-bold uppercase tracking-[0.08em] sm:text-base">
         <span className="text-[#112A42]">Sound</span>

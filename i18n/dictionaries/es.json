@@ -102,7 +102,30 @@
     "previousPage": "Anterior",
     "nextPage": "Siguiente",
     "page": "Página del pasaporte",
-    "rateLimited": "Spotify está limitando temporalmente las solicitudes. Tu conexión está segura; intenta cargar tu música nuevamente en unos {duration}."
+    "rateLimited": "Spotify está limitando temporalmente las solicitudes. Tu conexión está segura; intenta cargar tu música nuevamente en unos {duration}.",
+    "headOfState": "Jefe de Estado",
+    "headOfStateDescription": "El artista que gobierna tu música de los últimos seis meses.",
+    "currentAdministration": "Gobierno actual",
+    "termPresence": "Presente en {count} de 3 mandatos",
+    "capital": "Capital",
+    "inOfficeSince": "En el poder desde",
+    "government": "Gobierno",
+    "stateAnthem": "Himno de Estado",
+    "stateAddress": "Discurso oficial",
+    "stateAddressText": "El gobierno de {artist} promete estribillos fuertes, excelente gusto y ninguna reducción de volumen.",
+    "undisclosed": "No revelado",
+    "independentState": "Estado independiente",
+    "classified": "Clasificado",
+    "artistOffices": {
+      "metal": "Comandante Supremo de los Riffs",
+      "punk": "Ministro de los Estribillos Fuertes",
+      "emo": "Secretario de los Sentimientos Públicos",
+      "hipHop": "Ministro del Ritmo y la Rima",
+      "electronic": "Director de Operaciones Nocturnas",
+      "pop": "Ministro de los Estribillos Inevitables",
+      "rock": "Director General de Guitarras",
+      "default": "Jefe del Estado Musical"
+    }
   },
   "about": {
     "eyebrow": "Acerca de SoundPassport",

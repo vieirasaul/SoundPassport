@@ -36,8 +36,8 @@ export async function generateMetadata({
     title: dictionary.metadata.title,
     description: dictionary.metadata.description,
     icons: {
-      icon: "/logo.png",
-      shortcut: "/logo.png",
+      icon: "/favicon.svg",
+      shortcut: "/favicon.svg",
       apple: "/logo.png",
     },
   };

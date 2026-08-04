@@ -102,7 +102,30 @@
     "previousPage": "Anterior",
     "nextPage": "Próxima",
     "page": "Página do passaporte",
-    "rateLimited": "O Spotify está limitando as solicitações temporariamente. Sua conexão está segura; tente carregar suas músicas novamente em cerca de {duration}."
+    "rateLimited": "O Spotify está limitando as solicitações temporariamente. Sua conexão está segura; tente carregar suas músicas novamente em cerca de {duration}.",
+    "headOfState": "Chefe de Estado",
+    "headOfStateDescription": "O artista que governou suas músicas nos últimos seis meses.",
+    "currentAdministration": "Governo atual",
+    "termPresence": "Presente em {count} de 3 mandatos",
+    "capital": "Capital",
+    "inOfficeSince": "No poder desde",
+    "government": "Governo",
+    "stateAnthem": "Hino de Estado",
+    "stateAddress": "Pronunciamento oficial",
+    "stateAddressText": "O governo {artist} promete refrões altos, excelente gosto e nenhuma redução no volume.",
+    "undisclosed": "Não divulgado",
+    "independentState": "Estado independente",
+    "classified": "Confidencial",
+    "artistOffices": {
+      "metal": "Comandante Supremo dos Riffs",
+      "punk": "Ministro dos Refrões Altos",
+      "emo": "Secretário dos Sentimentos Públicos",
+      "hipHop": "Ministro do Ritmo e da Rima",
+      "electronic": "Diretor de Operações Noturnas",
+      "pop": "Ministro dos Refrões Inevitáveis",
+      "rock": "Diretor-Geral das Guitarras",
+      "default": "Chefe do Estado Musical"
+    }
   },
   "about": {
     "eyebrow": "Sobre o SoundPassport",

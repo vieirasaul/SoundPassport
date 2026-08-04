@@ -102,7 +102,30 @@
     "previousPage": "Previous",
     "nextPage": "Next",
     "page": "Passport page",
-    "rateLimited": "Spotify is temporarily limiting requests. Your connection is safe; try loading your music again in about {duration}."
+    "rateLimited": "Spotify is temporarily limiting requests. Your connection is safe; try loading your music again in about {duration}.",
+    "headOfState": "Head of State",
+    "headOfStateDescription": "The artist governing your listening over the last six months.",
+    "currentAdministration": "Current administration",
+    "termPresence": "Present in {count} of 3 terms",
+    "capital": "Capital",
+    "inOfficeSince": "In office since",
+    "government": "Government",
+    "stateAnthem": "State anthem",
+    "stateAddress": "State address",
+    "stateAddressText": "The {artist} administration promises loud choruses, excellent taste, and no reduction in volume.",
+    "undisclosed": "Undisclosed",
+    "independentState": "Independent state",
+    "classified": "Classified",
+    "artistOffices": {
+      "metal": "Supreme Commander of Riffs",
+      "punk": "Minister of Loud Choruses",
+      "emo": "Secretary of Public Feelings",
+      "hipHop": "Minister of Rhythm and Rhyme",
+      "electronic": "Director of Night Operations",
+      "pop": "Minister of Unavoidable Hooks",
+      "rock": "Chief Guitar Officer",
+      "default": "Head of Musical State"
+    }
   },
   "about": {
     "eyebrow": "About SoundPassport",
