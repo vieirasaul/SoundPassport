@@ -161,11 +161,11 @@ async function getArtistMetadata(artistNames: string[], featuredName: string | n
 
   const parameters = new URLSearchParams({
     query: artistNames
-      .slice(0, 8)
+      .slice(0, 16)
       .map((name) => `artist:"${name.replace(/["\\]/g, "\\$&")}"`)
       .join(" OR "),
     fmt: "json",
-    limit: "20",
+    limit: "30",
   });
 
   try {
@@ -338,6 +338,9 @@ export async function getPassportData(accessToken: string) {
   const metadataNames = Array.from(new Set([
     ...(headOfState ? [headOfState.name] : []),
     ...genreAffinities.slice(0, 8).map((affinity) => affinity.ambassador),
+    ...shortTermArtists.items.slice(0, 3).map((artist) => artist.name),
+    ...mediumTermArtists.items.slice(0, 3).map((artist) => artist.name),
+    ...longTermArtists.items.slice(0, 3).map((artist) => artist.name),
   ]));
   const artistMetadata = await getArtistMetadata(
     metadataNames,
@@ -386,7 +389,7 @@ globalPassportCache.soundPassportRequests = passportRequests;
 
 const freshLifetime = 12 * 60 * 60 * 1000;
 const staleLifetime = 7 * 24 * 60 * 60 * 1000;
-const passportDataVersion = "v5";
+const passportDataVersion = "v6";
 
 export async function getCachedPassportData(
   accountId: string,

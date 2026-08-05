@@ -246,7 +246,6 @@ export default async function PassportPage({
     : "";
   const primaryDestination = travelHistory[0];
   const secondaryDestination = travelHistory[1];
-  const listenerClass = dictionary.passportPage.verified;
   const machineReadableName = toMachineReadable(
     `SP MUSIC ${session.profile.displayName}`,
     42,
@@ -264,6 +263,36 @@ export default async function PassportPage({
     )],
     rank: index + 1,
   }));
+  const currentTopArtists = data?.shortTermArtists ?? [];
+  const legacyArtistIds = new Set(
+    (data?.longTermArtists ?? []).map((artist) => artist.id),
+  );
+  const legacyOverlap = currentTopArtists.filter((artist) =>
+    legacyArtistIds.has(artist.id),
+  ).length;
+  const overlapBase = Math.max(
+    Math.min(currentTopArtists.length, legacyArtistIds.size),
+    1,
+  );
+  const overlapRatio = legacyOverlap / overlapBase;
+  const travelerProfileKey = overlapRatio >= 0.6
+    ? "loyalDiplomat"
+    : overlapRatio <= 0.3
+      ? "borderExplorer"
+      : "seasonedVoyager";
+  const travelerProfile = dictionary.passportPage.travelerProfiles[travelerProfileKey];
+  const travelerProfileDescription =
+    dictionary.passportPage.travelerProfileDescriptions[travelerProfileKey];
+  const routeObservation = dictionary.passportPage.routeObservation
+    .replace("{count}", String(legacyOverlap))
+    .replace("{total}", String(currentTopArtists.length));
+  const travelEras = [
+    { label: dictionary.passportPage.currentExpedition, period: dictionary.passportPage.fourWeeks, artists: data?.shortTermArtists.slice(0, 3) ?? [] },
+    { label: dictionary.passportPage.longHaulRoute, period: dictionary.passportPage.oneYear, artists: data?.longTermArtists.slice(0, 3) ?? [] },
+  ];
+  const leadingArtistFlag = getCountryFlag(
+    data?.artistCountries?.[headOfState?.name.toLowerCase() ?? ""],
+  );
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -293,9 +322,9 @@ export default async function PassportPage({
               nextLabel={dictionary.passportPage.nextPage}
               pageLabel={dictionary.passportPage.page}
             >
-              <section className="relative overflow-hidden px-6 py-7 sm:px-9 sm:py-8">
+              <section className="relative h-full overflow-hidden px-6 py-7 sm:px-9 sm:py-8">
                 <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:radial-gradient(circle_at_center,#f1d77f_1px,transparent_1px)] [background-size:18px_18px]" />
-                <div className="relative">
+                <div className="relative flex h-full flex-col">
                   <header className="flex items-center justify-between border-b border-[#f1d77f]/40 pb-4">
                     <div><p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#e4cd8b]">{dictionary.passportPage.republic}</p><h1 className="mt-1 text-3xl font-semibold uppercase tracking-[0.18em] text-[#fff0bd]">{dictionary.passportPage.document}</h1><p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#e4cd8b]">{dictionary.passportPage.officialIdentityRecord}</p></div>
                     <div className="grid size-14 place-items-center rounded-full border-2 border-[#f1d77f]/75 text-2xl shadow-[inset_0_0_0_4px_rgba(241,215,127,0.08)]">♫</div>
@@ -305,16 +334,20 @@ export default async function PassportPage({
                     <div>
                       <div className="relative aspect-square overflow-hidden rounded-lg border border-[#f1d77f]/60 bg-[#183652]">
                         {portraitArtwork ? <Image src={portraitArtwork.url} alt="" fill sizes="140px" loading="eager" fetchPriority="high" className="object-cover opacity-90" /> : <div className="grid h-full place-items-center text-4xl">♫</div>}
-                        <span className="absolute bottom-2 right-2 rotate-[-7deg] rounded border border-[#fff0bd]/70 bg-[#112a42]/80 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.1em] text-[#fff0bd]">{dictionary.passportPage.verified}</span>
                       </div>
                       <p className="mt-1.5 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-[#e4cd8b]">{dictionary.passportPage.musicalPortrait}</p>
-                      <p className="mt-2 border-b border-[#f1d77f]/35 pb-1 text-center text-base italic text-[#fff0bd]">{session.profile.displayName}</p>
-                      <p className="mt-1 text-center text-[9px] uppercase tracking-[0.12em] text-[#e4cd8b]">{dictionary.passportPage.listenerSignature}</p>
+                      <div className="relative mx-auto mt-4 grid size-[84px] rotate-[-5deg] place-items-center rounded-full border-4 border-double border-[#f1d77f]/65 text-center text-[#f1d77f]/90 sm:size-24">
+                        <span className="absolute inset-1.5 rounded-full border border-dashed border-[#f1d77f]/40" />
+                        <div className="relative">
+                          <span className="text-3xl leading-none" aria-hidden="true">♫</span>
+                          <p className="mt-1 text-[8px] font-bold uppercase leading-[1.05] tracking-[0.08em] sm:text-[9px]">{dictionary.passportPage.verified}</p>
+                        </div>
+                      </div>
                     </div>
                     <dl className="grid grid-cols-2 content-start gap-x-4 gap-y-4">
                       <div className="col-span-2"><dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.citizen}</dt><dd className="mt-1 text-2xl font-semibold text-[#fff0bd] sm:text-[28px]">{session.profile.displayName}</dd></div>
                       <div><dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.nationality}</dt><dd className="mt-1 text-base font-semibold text-[#fff0bd]">{nationality}</dd></div>
-                      <div><dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.listenerClass}</dt><dd className="mt-1 text-base font-semibold text-[#fff0bd]">{listenerClass}</dd></div>
+                      <div><dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.primaryTerritory}</dt><dd className="mt-1 text-base font-semibold text-[#fff0bd]">{primaryDestination?.destination ?? dictionary.passportPage.undisclosed}</dd></div>
                       <div><dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.documentType}</dt><dd className="mt-1 text-base font-semibold text-[#fff0bd]">{dictionary.passportPage.documentTypeValue}</dd></div>
                       <div><dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.passportNumber}</dt><dd className="mt-1 text-base font-semibold text-[#fff0bd]">{passportNumber}</dd></div>
                       <div><dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.issued}</dt><dd className="mt-1 text-base font-semibold text-[#fff0bd]">{issueDate}</dd></div>
@@ -322,14 +355,17 @@ export default async function PassportPage({
                     </dl>
                   </div>
 
-                  <dl className="mt-5 grid grid-cols-3 gap-4 border-y border-[#f1d77f]/30 py-4">
-                    <div><dt className="text-[10px] font-semibold uppercase tracking-[0.13em] text-[#e4cd8b]">{dictionary.passportPage.primaryTerritory}</dt><dd className="mt-1 truncate text-sm font-semibold text-[#fff0bd]">{primaryDestination?.destination ?? dictionary.passportPage.undisclosed}</dd></div>
+                  <dl className="mt-5 grid grid-cols-2 gap-4 border-y border-[#f1d77f]/30 py-4">
                     <div><dt className="text-[10px] font-semibold uppercase tracking-[0.13em] text-[#e4cd8b]">{dictionary.passportPage.headOfState}</dt><dd className="mt-1 truncate text-sm font-semibold text-[#fff0bd]">{headOfState?.name ?? dictionary.passportPage.undisclosed}</dd></div>
                     <div><dt className="text-[10px] font-semibold uppercase tracking-[0.13em] text-[#e4cd8b]">{dictionary.passportPage.issuingAuthority}</dt><dd className="mt-1 text-sm font-semibold text-[#fff0bd]">SoundPassport</dd></div>
                   </dl>
 
                   <div className="mt-4 rounded-lg border border-[#f1d77f]/25 bg-[#081a2b]/45 px-3 py-2 font-mono text-[11px] leading-4 tracking-[0.08em] text-[#f1d77f]/80"><p>{machineReadableName}</p><p>{machineReadableIdentity}</p></div>
-                  <p className="mt-3 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-[#e4cd8b]">{dictionary.passportPage.identityVerified}</p>
+                  <div className="mx-auto mt-auto w-64 pt-4 text-center">
+                    <p className="whitespace-nowrap text-[38px] leading-none text-[#fff0bd] [font-family:'Snell_Roundhand','Segoe_Script','Brush_Script_MT',cursive] sm:text-[44px]"><span className="passport-signature relative inline-block">{session.profile.displayName}</span></p>
+                    <div className="mt-1 border-b border-[#f1d77f]/45" />
+                    <p className="mt-1.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.listenerSignature}</p>
+                  </div>
                 </div>
               </section>
 
@@ -456,6 +492,67 @@ export default async function PassportPage({
                     </blockquote>
                   </div>
                 ) : <p className="mt-10 text-sm text-[#f1d77f]/75">{dictionary.passportPage.empty}</p>}
+              </section>
+
+              <section className="flex h-full flex-col px-6 py-7 sm:px-10 sm:py-8">
+                <header>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#e4cd8b]">{dictionary.passportPage.republic}</p>
+                  <h2 className="mt-2 text-3xl font-semibold text-[#fff0bd]">{dictionary.passportPage.travelEras}</h2>
+                  <p className="mt-1.5 text-sm leading-5 text-[#f1d77f]/75">{dictionary.passportPage.travelErasDescription}</p>
+                </header>
+
+                <div className="mt-6 space-y-4">
+                  {travelEras.map((era, eraIndex) => (
+                    <article key={era.label} className="rounded-xl border border-[#f1d77f]/30 bg-[#081a2b]/30 px-4 py-3">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <h3 className="font-serif text-lg font-bold uppercase tracking-[0.05em] text-[#fff0bd]">{era.label}</h3>
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#e4cd8b]">{era.period}</span>
+                      </div>
+                      <ol className="mt-2.5 grid grid-cols-3 gap-2">
+                        {era.artists.map((artist, artistIndex) => (
+                          <li key={artist.id} className="min-w-0 rounded-lg border border-[#f1d77f]/20 bg-[#112a42] px-2 py-2 text-center">
+                            <span className="text-xl" aria-hidden="true">{getCountryFlag(data?.artistCountries?.[artist.name.toLowerCase()])}</span>
+                            <p className="mt-1 min-h-8 text-balance break-words text-xs font-semibold leading-4 text-[#fff0bd]">{artistIndex + 1}. {artist.name}</p>
+                          </li>
+                        ))}
+                      </ol>
+                      <p className="mt-2 text-right font-mono text-[9px] uppercase tracking-[0.12em] text-[#f1d77f]/55">{dictionary.passportPage.route} {String(eraIndex + 1).padStart(2, "0")}</p>
+                    </article>
+                  ))}
+                </div>
+
+                <div className="mt-auto rounded-xl border border-dashed border-[#f1d77f]/40 px-4 py-3 text-center">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.borderPattern}</p>
+                  <p className="mt-1.5 text-base font-semibold text-[#fff0bd]">{routeObservation}</p>
+                </div>
+              </section>
+
+              <section className="relative flex h-full flex-col overflow-hidden px-6 py-7 sm:px-10 sm:py-8">
+                <div className="pointer-events-none absolute inset-0 opacity-[0.07] [background-image:radial-gradient(circle_at_center,#f1d77f_1px,transparent_1px)] [background-size:16px_16px]" />
+                <div className="relative flex h-full flex-col">
+                  <header className="text-center">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#e4cd8b]">{dictionary.passportPage.republic}</p>
+                    <div className="mx-auto mt-3 grid size-16 place-items-center rounded-full border-2 border-[#f1d77f]/70 text-3xl">♫</div>
+                    <h2 className="mt-3 font-serif text-3xl font-semibold uppercase tracking-[0.08em] text-[#fff0bd]">{dictionary.passportPage.finalBorderReport}</h2>
+                    <p className="mt-1 text-sm text-[#f1d77f]/75">{dictionary.passportPage.finalBorderDescription}</p>
+                  </header>
+
+                  <div className="mt-6 rounded-2xl border-2 border-[#f1d77f]/50 bg-[#081a2b]/35 p-5 text-center">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#e4cd8b]">{dictionary.passportPage.travelerClassification}</p>
+                    <p className="mt-2 font-serif text-2xl font-bold uppercase tracking-[0.06em] text-[#fff0bd]">{travelerProfile}</p>
+                    <p className="mt-2 text-xl font-semibold text-[#fff0bd]">{session.profile.displayName}</p>
+                  </div>
+
+                  <dl className="mt-5 grid grid-cols-2 gap-3">
+                    <div className="rounded-xl border border-[#f1d77f]/25 bg-[#112a42]/80 p-3"><dt className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[#e4cd8b]">{dictionary.passportPage.nationality}</dt><dd className="mt-1 text-sm font-semibold text-[#fff0bd]">{nationality}</dd></div>
+                    <div className="rounded-xl border border-[#f1d77f]/25 bg-[#112a42]/80 p-3"><dt className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[#e4cd8b]">{dictionary.passportPage.leadingCountry}</dt><dd className="mt-1 text-sm font-semibold text-[#fff0bd]">{leadingArtistFlag} {headOfState?.name ?? dictionary.passportPage.undisclosed}</dd></div>
+                    <div className="rounded-xl border border-[#f1d77f]/25 bg-[#112a42]/80 p-3"><dt className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[#e4cd8b]">{dictionary.passportPage.primaryTerritory}</dt><dd className="mt-1 text-sm font-semibold text-[#fff0bd]">{primaryDestination?.destination ?? dictionary.passportPage.undisclosed}</dd></div>
+                    <div className="rounded-xl border border-[#f1d77f]/25 bg-[#112a42]/80 p-3"><dt className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[#e4cd8b]">{dictionary.passportPage.officialAnthem}</dt><dd className="mt-1 truncate text-sm font-semibold text-[#fff0bd]">{data?.mediumTerm[0]?.name ?? dictionary.passportPage.classified}</dd></div>
+                  </dl>
+
+                  <p className="mt-5 rounded-xl border border-dashed border-[#f1d77f]/40 px-4 py-3 text-center text-sm font-medium leading-5 text-[#fff0bd]">{travelerProfileDescription}</p>
+                  <div className="mt-auto flex justify-center"><span className="rotate-[-4deg] rounded-lg border-2 border-[#f1d77f]/65 px-5 py-2 font-serif text-sm font-bold uppercase tracking-[0.12em] text-[#f1d77f]">{dictionary.passportPage.clearedForTravel}</span></div>
+                </div>
               </section>
 
             </PassportBooklet>

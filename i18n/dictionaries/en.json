@@ -101,9 +101,7 @@
     "musicalPortrait": "Musical portrait",
     "verified": "Verified listener",
     "listenerSignature": "Listener signature",
-    "listenerClass": "Listener class",
     "issuingAuthority": "Issuing authority",
-    "identityVerified": "Identity verified by the Republic of Music",
     "nationalities": {
       "metal": "Metalhead",
       "punk": "Punk native",
@@ -139,6 +137,30 @@
     "highCouncil": "Most Visited Countries",
     "highCouncilDescription": "The three artist territories your musical passport returns to most.",
     "councilPeriodLegend": "We rank these based on your top artists from the last 6 months.",
+    "travelEras": "Travel Eras",
+    "travelErasDescription": "Compare your current expedition with your long-haul musical route.",
+    "currentExpedition": "Current expedition",
+    "longHaulRoute": "Long-haul route",
+    "fourWeeks": "Last 4 weeks",
+    "oneYear": "About 1 year",
+    "route": "Route",
+    "borderPattern": "Border pattern",
+    "routeObservation": "{count} of your current top {total} artists also appear on your one-year route.",
+    "travelerProfiles": {
+      "loyalDiplomat": "Loyal Diplomat",
+      "borderExplorer": "Border Explorer",
+      "seasonedVoyager": "Seasoned Voyager"
+    },
+    "travelerProfileDescriptions": {
+      "loyalDiplomat": "Your current expedition remains closely connected to your long-term destinations.",
+      "borderExplorer": "Your current expedition is filled with destinations absent from your long-term route.",
+      "seasonedVoyager": "Your journey balances familiar destinations with new musical borders."
+    },
+    "finalBorderReport": "Final Border Report",
+    "finalBorderDescription": "Your musical journey, cleared and officially recorded.",
+    "travelerClassification": "Traveler classification",
+    "leadingCountry": "Leading destination",
+    "clearedForTravel": "Cleared for musical travel",
     "artistOffices": {
       "metal": "Riff Commander",
       "punk": "Chorus Minister",

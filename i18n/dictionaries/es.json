@@ -101,9 +101,7 @@
     "musicalPortrait": "Retrato musical",
     "verified": "Oyente verificado",
     "listenerSignature": "Firma del oyente",
-    "listenerClass": "Clase de oyente",
     "issuingAuthority": "Autoridad emisora",
-    "identityVerified": "Identidad verificada por la República de la Música",
     "nationalities": {
       "metal": "Metalero",
       "punk": "Nativo del punk",
@@ -139,6 +137,30 @@
     "highCouncil": "Países Más Visitados",
     "highCouncilDescription": "Los tres territorios de artistas a los que más regresa tu pasaporte musical.",
     "councilPeriodLegend": "Los clasificamos según tus artistas favoritos de los últimos 6 meses.",
+    "travelEras": "Eras de Viaje",
+    "travelErasDescription": "Compara tu expedición actual con tu ruta musical de larga distancia.",
+    "currentExpedition": "Expedición actual",
+    "longHaulRoute": "Ruta de larga distancia",
+    "fourWeeks": "Últimas 4 semanas",
+    "oneYear": "Cerca de 1 año",
+    "route": "Ruta",
+    "borderPattern": "Patrón fronterizo",
+    "routeObservation": "{count} de tus {total} artistas favoritos actuales también aparecen en tu ruta de un año.",
+    "travelerProfiles": {
+      "loyalDiplomat": "Diplomático Leal",
+      "borderExplorer": "Explorador de Fronteras",
+      "seasonedVoyager": "Viajero Experimentado"
+    },
+    "travelerProfileDescriptions": {
+      "loyalDiplomat": "Tu expedición actual sigue conectada con tus destinos de larga duración.",
+      "borderExplorer": "Tu expedición actual está llena de destinos ausentes de tu ruta de larga duración.",
+      "seasonedVoyager": "Tu viaje equilibra destinos conocidos con nuevas fronteras musicales."
+    },
+    "finalBorderReport": "Informe Final de Frontera",
+    "finalBorderDescription": "Tu viaje musical, autorizado y registrado oficialmente.",
+    "travelerClassification": "Clasificación del viajero",
+    "leadingCountry": "Destino principal",
+    "clearedForTravel": "Autorizado para viajar musicalmente",
     "artistOffices": {
       "metal": "Comandante de Riffs",
       "punk": "Ministro de Estribillos",

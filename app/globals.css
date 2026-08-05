@@ -100,6 +100,41 @@ html {
   }
 }
 
+.passport-booklet-sheet-initial .passport-signature,
+.passport-booklet-sheet:target .passport-signature {
+  animation: passport-signature-write 1.9s cubic-bezier(0.3, 0.08, 0.18, 1) 240ms both;
+}
+
+.passport-signature::after {
+  position: absolute;
+  top: 56%;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  content: "";
+  border-radius: 9999px;
+  background: #fff0bd;
+  box-shadow: 0 0 8px rgb(241 215 127 / 0.85);
+  opacity: 0;
+}
+
+.passport-booklet-sheet-initial .passport-signature::after,
+.passport-booklet-sheet:target .passport-signature::after {
+  animation: passport-signature-pen 1.9s cubic-bezier(0.3, 0.08, 0.18, 1) 240ms both;
+}
+
+@keyframes passport-signature-write {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 -8px 0 0); }
+}
+
+@keyframes passport-signature-pen {
+  0% { left: 0; opacity: 0; }
+  4% { opacity: 1; }
+  92% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
 .artist-seal {
   transform: rotate(var(--seal-rotation, 0deg));
 }
@@ -167,6 +202,13 @@ html {
   }
 
   .passport-booklet-sheet:target .artist-seal::after {
+    animation: none;
+  }
+
+  .passport-booklet-sheet-initial .passport-signature,
+  .passport-booklet-sheet:target .passport-signature,
+  .passport-booklet-sheet-initial .passport-signature::after,
+  .passport-booklet-sheet:target .passport-signature::after {
     animation: none;
   }
 }
