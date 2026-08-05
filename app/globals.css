@@ -112,6 +112,16 @@ html {
   to { width: 100%; }
 }
 
+.passport-export-page {
+  visibility: visible !important;
+}
+
+.passport-export-page,
+.passport-export-page * {
+  animation: none !important;
+  transition: none !important;
+}
+
 .passport-booklet-sheet-initial .passport-signature,
 .passport-booklet-sheet:target .passport-signature {
   animation: passport-signature-write 1.9s cubic-bezier(0.3, 0.08, 0.18, 1) 240ms both;

@@ -324,6 +324,10 @@ export default async function PassportPage({
               playLabel={dictionary.passportPage.playPassport}
               pauseLabel={dictionary.passportPage.pausePassport}
               progressLabel={dictionary.passportPage.pageProgress}
+              downloadPageLabel={dictionary.passportPage.downloadPage}
+              downloadAllLabel={dictionary.passportPage.downloadAllPages}
+              downloadingLabel={dictionary.passportPage.downloading}
+              downloadErrorLabel={dictionary.passportPage.downloadError}
             >
               <section className="relative h-full overflow-hidden px-6 py-7 sm:px-9 sm:py-8">
                 <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:radial-gradient(circle_at_center,#f1d77f_1px,transparent_1px)] [background-size:18px_18px]" />
@@ -401,7 +405,7 @@ export default async function PassportPage({
                         />
                       ))}
                     </div>
-                    <p className="mt-auto pb-1 text-center text-[10px] font-semibold uppercase leading-4 tracking-[0.1em] text-[#e4cd8b]">{dictionary.passportPage.councilPeriodLegend}</p>
+                    <p className="mt-auto pb-1 text-center text-[9px] font-semibold uppercase leading-4 tracking-[0.1em] text-[#e4cd8b]">{dictionary.passportPage.councilPeriodLegend}</p>
                   </div>
                 ) : <p className="mt-10 text-sm text-[#f1d77f]/75">{dictionary.passportPage.empty}</p>}
               </section>
