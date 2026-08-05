@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { MobileMenu } from "@/components/mobile-menu";
 import { NavigationLinks } from "@/components/navigation-links";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/get-dictionary";
@@ -21,8 +22,8 @@ export function Header({ locale, navigation, currentPath }: HeaderProps) {
 
   return (
     <header className="border-b border-black/[0.06]">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between sm:h-20">
           <Link
             href={`/${locale}`}
             className="flex items-center gap-2.5 text-[15px] font-semibold tracking-[-0.02em] text-ink"
@@ -31,8 +32,8 @@ export function Header({ locale, navigation, currentPath }: HeaderProps) {
             <BrandLogo />
           </Link>
 
-          <div className="flex items-center">
-            <nav aria-label={navigation.homeLabel} className="hidden sm:block">
+          <div className="hidden items-center sm:flex">
+            <nav aria-label={navigation.homeLabel}>
               <NavigationLinks
                 links={links}
                 className="flex items-center gap-1"
@@ -44,17 +45,14 @@ export function Header({ locale, navigation, currentPath }: HeaderProps) {
               currentPath={currentPath}
             />
           </div>
-        </div>
-
-        <nav
-          aria-label={navigation.homeLabel}
-          className="border-t border-black/[0.05] py-2 sm:hidden"
-        >
-          <NavigationLinks
+          <MobileMenu
+            locale={locale}
+            label={navigation.menuLabel}
+            languageLabel={navigation.languageLabel}
+            currentPath={currentPath}
             links={links}
-            className="flex items-center justify-center gap-1"
           />
-        </nav>
+        </div>
       </div>
     </header>
   );

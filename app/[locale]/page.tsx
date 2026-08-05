@@ -34,7 +34,7 @@ export default async function Home({
       <Header locale={locale} navigation={dictionary.navigation} />
 
       <main className="flex flex-1 flex-col">
-        <section className="mx-auto grid max-w-7xl items-center gap-16 px-6 py-24 sm:py-32 lg:grid-cols-[1fr_0.82fr] lg:px-8 lg:py-36">
+        <section className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[1fr_0.82fr] lg:gap-16 lg:px-8 lg:py-36">
           <div className="max-w-2xl">
             <p className="mb-6 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
               <span className="block h-px w-6 bg-muted/60" />
@@ -43,7 +43,7 @@ export default async function Home({
             <h1 className="text-balance text-4xl font-semibold leading-[1.08] tracking-[-0.05em] text-ink sm:text-5xl lg:text-[56px]">
               {dictionary.hero.title}
             </h1>
-            <p className="mt-7 max-w-xl text-pretty text-lg leading-8 text-muted sm:text-xl sm:leading-9">
+            <p className="mt-5 max-w-xl text-pretty text-base leading-7 text-muted sm:mt-7 sm:text-xl sm:leading-9">
               {dictionary.hero.description}
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-4">

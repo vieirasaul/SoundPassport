@@ -10,17 +10,19 @@ type LanguageSwitcherProps = {
   locale: Locale;
   label: string;
   currentPath?: string;
+  mobile?: boolean;
 };
 
 export function LanguageSwitcher({
   locale,
   label,
   currentPath = "",
+  mobile = false,
 }: LanguageSwitcherProps) {
   return (
-    <details className="group relative ml-1">
+    <details className={`group relative ${mobile ? "" : "ml-1"}`}>
       <summary
-        className="flex h-9 cursor-pointer list-none items-center gap-2 rounded-lg border border-black/[0.08] bg-white py-0 pl-3 pr-2.5 text-sm font-medium text-ink shadow-sm outline-none transition hover:border-black/[0.16] focus-visible:ring-2 focus-visible:ring-ink/20 [&::-webkit-details-marker]:hidden"
+        className={`flex h-9 cursor-pointer list-none items-center gap-2 rounded-lg border border-black/[0.08] bg-white py-0 pl-3 pr-2.5 text-sm font-medium text-ink shadow-sm outline-none transition hover:border-black/[0.16] focus-visible:ring-2 focus-visible:ring-ink/20 [&::-webkit-details-marker]:hidden ${mobile ? "w-full justify-between" : ""}`}
         aria-label={label}
       >
         <span>{localeLabels[locale]}</span>
@@ -40,7 +42,7 @@ export function LanguageSwitcher({
         </svg>
       </summary>
 
-      <div className="absolute right-0 z-50 mt-2 min-w-40 overflow-hidden rounded-xl border border-black/[0.08] bg-white p-1.5 shadow-xl shadow-black/10">
+      <div className={`${mobile ? "relative mt-1.5 w-full" : "absolute right-0 mt-2 min-w-40"} z-50 overflow-hidden rounded-xl border border-black/[0.08] bg-white p-1.5 shadow-xl shadow-black/10`}>
         {locales.map((option) => (
           <Link
             key={option}

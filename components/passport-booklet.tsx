@@ -1,7 +1,7 @@
 "use client";
 
 import { Archive, Download, Pause, Play } from "lucide-react";
-import { Children, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { Children, type PointerEvent as ReactPointerEvent, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 type PassportBookletProps = {
   children: ReactNode;
@@ -48,6 +48,7 @@ export function PassportBooklet({
 }: PassportBookletProps) {
   const pages = Children.toArray(children);
   const pageRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const swipeRef = useRef<{ pointerId: number; startX: number; startY: number } | null>(null);
   const [activePage, setActivePage] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isDocumentVisible, setIsDocumentVisible] = useState(true);
@@ -106,6 +107,26 @@ export function PassportBooklet({
   const selectPageManually = (page: number) => {
     setIsPlaying(false);
     selectPage(page);
+  };
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest("a, button, input, summary")) return;
+    swipeRef.current = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handlePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const swipe = swipeRef.current;
+    swipeRef.current = null;
+    if (!swipe || swipe.pointerId !== event.pointerId) return;
+
+    const horizontalDistance = event.clientX - swipe.startX;
+    const verticalDistance = event.clientY - swipe.startY;
+    if (Math.abs(horizontalDistance) < 48 || Math.abs(horizontalDistance) < Math.abs(verticalDistance) * 1.2) return;
+
+    setIsPlaying(false);
+    if (horizontalDistance < 0 && activePage < pages.length - 1) goToPage(activePage + 1);
+    if (horizontalDistance > 0 && activePage > 0) goToPage(activePage - 1);
   };
 
   const handleProgressComplete = () => {
@@ -243,7 +264,7 @@ export function PassportBooklet({
   const isExporting = exportState === "page" || exportState === "all" || exportState === "share";
 
   return (
-    <div className="passport-booklet mx-auto grid max-w-[620px] [perspective:1800px]">
+    <div className="passport-booklet mx-auto grid w-full max-w-[620px] [perspective:1800px]">
       {pages.map((content, page) => (
         <section
           key={page}
@@ -251,16 +272,22 @@ export function PassportBooklet({
           className={`passport-booklet-sheet col-start-1 row-start-1 ${page === 0 ? "passport-booklet-sheet-initial" : ""}`}
           aria-hidden={activePage !== page}
         >
-          <div ref={(node) => { pageRefs.current[page] = node; }} className="passport-booklet-paper rounded-[30px] bg-[#081a2b] p-2 shadow-[0_38px_100px_rgba(8,26,43,0.3)]">
-            <div className="h-[700px] overflow-hidden rounded-[24px] border border-[#e6c979]/60 bg-[#112a42] text-[#f1d77f]">
-              <div className="h-full overflow-y-auto overscroll-contain [scrollbar-color:rgba(241,215,127,0.35)_transparent] [scrollbar-width:thin]">
+          <div
+            ref={(node) => { pageRefs.current[page] = node; }}
+            onPointerDown={handlePointerDown}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={() => { swipeRef.current = null; }}
+            className="passport-booklet-paper cursor-grab touch-pan-y select-none rounded-[22px] bg-[#081a2b] p-1.5 shadow-[0_24px_70px_rgba(8,26,43,0.26)] active:cursor-grabbing sm:rounded-[30px] sm:p-2 sm:shadow-[0_38px_100px_rgba(8,26,43,0.3)]"
+          >
+            <div className="h-[720px] overflow-hidden rounded-[17px] border border-[#e6c979]/60 bg-[#112a42] text-[#f1d77f] sm:h-[700px] sm:rounded-[24px]">
+              <div className="h-full overflow-hidden">
                 {content}
               </div>
             </div>
           </div>
 
           <div className="mt-3 flex flex-wrap items-center justify-center gap-2.5" aria-label={shareSocialLabel}>
-            <span className="mr-1 text-xs font-semibold text-muted">{shareSocialLabel}</span>
+            <span className="w-full text-center text-[11px] font-semibold text-muted sm:mr-1 sm:w-auto sm:text-xs">{shareSocialLabel}</span>
             <button
               type="button"
               onClick={shareToInstagram}
@@ -308,11 +335,11 @@ export function PassportBooklet({
             />
           </div>
 
-          <nav className="mt-3 flex items-center justify-between" aria-label={pageLabel}>
+          <nav className="mt-3 flex items-center justify-between gap-2" aria-label={pageLabel}>
             {page === 0 ? (
-              <span className="rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-sm font-semibold text-ink opacity-35">← {previousLabel}</span>
+              <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-xl border border-black/[0.09] bg-white px-3 text-sm font-semibold text-ink opacity-35 sm:px-4">← <span className="hidden sm:ml-1 sm:inline">{previousLabel}</span></span>
             ) : (
-              <a href={`#passport-page-${page}`} onClick={() => selectPageManually(page - 1)} className="rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-sm font-semibold text-ink shadow-sm transition hover:border-black/[0.16]">← {previousLabel}</a>
+              <a href={`#passport-page-${page}`} onClick={() => selectPageManually(page - 1)} aria-label={previousLabel} className="inline-flex h-10 min-w-10 items-center justify-center rounded-xl border border-black/[0.09] bg-white px-3 text-sm font-semibold text-ink shadow-sm transition hover:border-black/[0.16] sm:px-4">← <span className="hidden sm:ml-1 sm:inline">{previousLabel}</span></a>
             )}
 
             <div className="flex items-center gap-2">
@@ -353,9 +380,9 @@ export function PassportBooklet({
             </div>
 
             {page === pages.length - 1 ? (
-              <span className="rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-sm font-semibold text-ink opacity-35">{nextLabel} →</span>
+              <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-xl border border-black/[0.09] bg-white px-3 text-sm font-semibold text-ink opacity-35 sm:px-4"><span className="hidden sm:mr-1 sm:inline">{nextLabel}</span> →</span>
             ) : (
-              <a href={`#passport-page-${page + 2}`} onClick={() => selectPageManually(page + 1)} className="rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-sm font-semibold text-ink shadow-sm transition hover:border-black/[0.16]">{nextLabel} →</a>
+              <a href={`#passport-page-${page + 2}`} onClick={() => selectPageManually(page + 1)} aria-label={nextLabel} className="inline-flex h-10 min-w-10 items-center justify-center rounded-xl border border-black/[0.09] bg-white px-3 text-sm font-semibold text-ink shadow-sm transition hover:border-black/[0.16] sm:px-4"><span className="hidden sm:mr-1 sm:inline">{nextLabel}</span> →</a>
             )}
           </nav>
           {shareNotice ? (

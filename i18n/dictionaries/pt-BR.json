@@ -8,7 +8,8 @@
     "about": "Sobre",
     "contact": "Contato",
     "homeLabel": "Página inicial do SoundPassport",
-    "languageLabel": "Idioma"
+    "languageLabel": "Idioma",
+    "menuLabel": "Abrir menu de navegação"
   },
   "hero": {
     "eyebrow": "Sua música, documentada",

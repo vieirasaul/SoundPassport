@@ -10,7 +10,7 @@ type FooterProps = {
 
 export function Footer({ content, locale }: FooterProps) {
   return (
-    <footer className="mx-auto mt-auto w-full max-w-7xl px-6 pb-6 lg:px-8">
+    <footer className="mx-auto mt-auto w-full max-w-7xl px-4 pb-5 sm:px-6 sm:pb-6 lg:px-8">
       <div className="grid items-center gap-3 border-t border-black/[0.06] pt-5 text-center text-xs text-muted sm:grid-cols-[1fr_auto_1fr] sm:text-left">
         <p>{content.tagline}</p>
         <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">

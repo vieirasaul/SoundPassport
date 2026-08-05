@@ -39,7 +39,7 @@ export function ArtistSeal({
       target="_blank"
       rel="noreferrer"
       aria-label={`${openLabel}: ${artist.name}`}
-      className={`artist-seal group relative grid aspect-square shrink-0 place-items-center rounded-full border-[6px] border-double border-[#f1d77f]/80 bg-[#0b2237] text-center shadow-[0_14px_34px_rgba(0,0,0,0.28),inset_0_0_0_6px_rgba(241,215,127,0.12)] transition hover:border-[#fff0bd] ${featured ? "w-[225px] sm:w-[260px]" : "w-[138px] sm:w-[210px]"}`}
+      className={`artist-seal group relative grid aspect-square shrink-0 place-items-center rounded-full border-[5px] border-double border-[#f1d77f]/80 bg-[#0b2237] text-center shadow-[0_14px_34px_rgba(0,0,0,0.28),inset_0_0_0_6px_rgba(241,215,127,0.12)] transition hover:border-[#fff0bd] sm:border-[6px] ${featured ? "w-[205px] min-[360px]:w-[225px] sm:w-[260px]" : "w-[118px] min-[360px]:w-[138px] sm:w-[210px]"}`}
       style={style}
     >
       <span className="absolute inset-[8px] rounded-full border border-dashed border-[#f1d77f]/45" />
