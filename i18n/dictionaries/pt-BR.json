@@ -98,6 +98,24 @@
     "tryAgain": "Tentar novamente",
     "identityPage": "Página de identidade",
     "travelHistoryDescription": "Destinos carimbados a partir das suas maiores afinidades musicais dos últimos seis meses.",
+    "foreignAffairs": "Relações Exteriores",
+    "primaryTerritory": "Território musical principal",
+    "ambassador": "Embaixador",
+    "visaStatus": "Situação do visto",
+    "influence": "Influência",
+    "borderReport": "Seu passaporte está ancorado em {primary}, com uma rota diplomática recorrente por {secondary}.",
+    "visaStatuses": {
+      "permanentResident": "Residente permanente",
+      "frequentVisitor": "Visitante frequente",
+      "newArrival": "Recém-chegado",
+      "returningCitizen": "Cidadão retornando",
+      "formerResidence": "Antiga residência"
+    },
+    "influences": {
+      "growing": "Crescendo",
+      "stable": "Estável",
+      "fading": "Diminuindo"
+    },
     "anthemsPage": "Hinos nacionais",
     "previousPage": "Anterior",
     "nextPage": "Próxima",

@@ -98,6 +98,24 @@
     "tryAgain": "Intentar de nuevo",
     "identityPage": "Página de identidad",
     "travelHistoryDescription": "Destinos sellados a partir de tus afinidades musicales más fuertes de los últimos seis meses.",
+    "foreignAffairs": "Asuntos Exteriores",
+    "primaryTerritory": "Territorio musical principal",
+    "ambassador": "Embajador",
+    "visaStatus": "Estado del visado",
+    "influence": "Influencia",
+    "borderReport": "Tu pasaporte está anclado en {primary}, con una ruta diplomática recurrente por {secondary}.",
+    "visaStatuses": {
+      "permanentResident": "Residente permanente",
+      "frequentVisitor": "Visitante frecuente",
+      "newArrival": "Recién llegado",
+      "returningCitizen": "Ciudadano de regreso",
+      "formerResidence": "Antigua residencia"
+    },
+    "influences": {
+      "growing": "Creciendo",
+      "stable": "Estable",
+      "fading": "Disminuyendo"
+    },
     "anthemsPage": "Himnos nacionales",
     "previousPage": "Anterior",
     "nextPage": "Siguiente",

@@ -38,6 +38,15 @@ export type ArtistProfile = {
   disambiguation: string | null;
 };
 
+export type GenreAffinity = {
+  genre: string;
+  ambassador: string;
+  shortTermScore: number;
+  mediumTermScore: number;
+  longTermScore: number;
+  periods: number;
+};
+
 type MusicBrainzArtistSearch = {
   artists?: Array<{
     name: string;
@@ -179,6 +188,72 @@ async function getArtistProfile(artistName: string): Promise<ArtistProfile | nul
   }
 }
 
+function buildGenreAffinities(
+  shortTerm: SpotifyArtist[],
+  mediumTerm: SpotifyArtist[],
+  longTerm: SpotifyArtist[],
+) {
+  const affinities = new Map<
+    string,
+    GenreAffinity & { ambassadorRank: number }
+  >();
+
+  const addPeriod = (
+    artists: SpotifyArtist[],
+    period: "shortTermScore" | "mediumTermScore" | "longTermScore",
+  ) => {
+    artists.forEach((artist, index) => {
+      const score = Math.max(10 - index, 1);
+
+      (artist.genres ?? []).forEach((rawGenre) => {
+        if (typeof rawGenre !== "string" || !rawGenre.trim()) return;
+
+        const genre = rawGenre.trim().toLowerCase();
+        const current = affinities.get(genre) ?? {
+          genre,
+          ambassador: artist.name,
+          ambassadorRank: Number.POSITIVE_INFINITY,
+          shortTermScore: 0,
+          mediumTermScore: 0,
+          longTermScore: 0,
+          periods: 0,
+        };
+
+        current[period] += score;
+        if (index < current.ambassadorRank) {
+          current.ambassador = artist.name;
+          current.ambassadorRank = index;
+        }
+        affinities.set(genre, current);
+      });
+    });
+  };
+
+  addPeriod(shortTerm, "shortTermScore");
+  addPeriod(mediumTerm, "mediumTermScore");
+  addPeriod(longTerm, "longTermScore");
+
+  return [...affinities.values()]
+    .map((affinity) => ({
+      genre: affinity.genre,
+      ambassador: affinity.ambassador,
+      shortTermScore: affinity.shortTermScore,
+      mediumTermScore: affinity.mediumTermScore,
+      longTermScore: affinity.longTermScore,
+      periods: [
+        affinity.shortTermScore,
+        affinity.mediumTermScore,
+        affinity.longTermScore,
+      ].filter((score) => score > 0).length,
+    }))
+    .sort(
+      (a, b) =>
+        b.mediumTermScore * 2 + b.shortTermScore + b.longTermScore -
+        (a.mediumTermScore * 2 + a.shortTermScore + a.longTermScore),
+    )
+    .slice(0, 12);
+}
+
 export async function getPassportData(accessToken: string) {
   const [mediumTerm, shortTermArtists, mediumTermArtists, longTermArtists] =
     await Promise.all([
@@ -212,17 +287,26 @@ export async function getPassportData(accessToken: string) {
   const headOfStateProfile = headOfState
     ? await getArtistProfile(headOfState.name)
     : null;
+  const genreAffinities = buildGenreAffinities(
+    shortTermArtists.items,
+    mediumTermArtists.items,
+    longTermArtists.items,
+  );
+  const rankedGenres = genreAffinities.length
+    ? genreAffinities.map((affinity) => affinity.genre)
+    : topGenres;
 
   return {
     mediumTerm: mediumTerm.items,
     longTerm: mediumTerm.items,
-    topGenres,
+    topGenres: rankedGenres,
     topArtistNames,
     shortTermArtists: shortTermArtists.items,
     mediumTermArtists: mediumTermArtists.items,
     longTermArtists: longTermArtists.items,
     headOfState,
     headOfStateProfile,
+    genreAffinities,
   };
 }
 
@@ -249,7 +333,7 @@ globalPassportCache.soundPassportRequests = passportRequests;
 
 const freshLifetime = 12 * 60 * 60 * 1000;
 const staleLifetime = 7 * 24 * 60 * 60 * 1000;
-const passportDataVersion = "v2";
+const passportDataVersion = "v3";
 
 export async function getCachedPassportData(
   accountId: string,

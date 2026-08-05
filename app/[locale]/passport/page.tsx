@@ -117,6 +117,30 @@ function getArtistTermPresence(data: PassportData, artistId: string) {
   ].filter(Boolean).length;
 }
 
+function getVisaStatus(affinity: PassportData["genreAffinities"][number]) {
+  if (
+    affinity.shortTermScore > 0 &&
+    affinity.mediumTermScore === 0 &&
+    affinity.longTermScore === 0
+  ) return "newArrival" as const;
+  if (
+    affinity.shortTermScore > 0 &&
+    affinity.mediumTermScore === 0 &&
+    affinity.longTermScore > 0
+  ) return "returningCitizen" as const;
+  if (affinity.periods === 3) return "permanentResident" as const;
+  if (affinity.longTermScore > 0 && affinity.shortTermScore === 0) {
+    return "formerResidence" as const;
+  }
+  return "frequentVisitor" as const;
+}
+
+function getGenreInfluence(affinity: PassportData["genreAffinities"][number]) {
+  if (affinity.shortTermScore > affinity.longTermScore + 2) return "growing" as const;
+  if (affinity.longTermScore > affinity.shortTermScore + 2) return "fading" as const;
+  return "stable" as const;
+}
+
 function formatRetryDuration(seconds: number, locale: string) {
   const unit = seconds >= 3600 ? "hour" : seconds >= 60 ? "minute" : "second";
   const divisor = unit === "hour" ? 3600 : unit === "minute" ? 60 : 1;
@@ -177,12 +201,29 @@ export default async function PassportPage({
     (genre): genre is string =>
       typeof genre === "string" && genre.trim().length > 0,
   );
-  const travelHistory = validTopGenres.length
+  const affinityTravelHistory = (data?.genreAffinities ?? [])
+    .map((affinity) => ({
+      source: affinity.genre,
+      destination: getGenreDestination(affinity.genre),
+      flag: getGenreFlag(affinity.genre),
+      affinity,
+    }))
+    .filter(
+      (place, index, places) =>
+        places.findIndex(
+          (candidate) => candidate.destination === place.destination,
+        ) === index,
+    )
+    .slice(0, 4);
+  const travelHistory = affinityTravelHistory.length
+    ? affinityTravelHistory
+    : validTopGenres.length
     ? validTopGenres
         .map((genre) => ({
           source: genre,
           destination: getGenreDestination(genre),
           flag: getGenreFlag(genre),
+          affinity: null,
         }))
         .filter(
           (place, index, places) =>
@@ -195,6 +236,7 @@ export default async function PassportPage({
         source: artist,
         destination: getArtistDestination(artist, index),
         flag: "🎵",
+        affinity: null,
       }));
   const nationality = getMusicNationality(validTopGenres);
   const portraitArtwork = data?.longTerm[0]?.album.images[0];
@@ -212,6 +254,8 @@ export default async function PassportPage({
   const artistOffice = headOfState
     ? dictionary.passportPage.artistOffices[getArtistOfficeCategory(headOfStateGenres)]
     : "";
+  const primaryDestination = travelHistory[0];
+  const secondaryDestination = travelHistory[1];
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -268,17 +312,41 @@ export default async function PassportPage({
               </section>
 
               <section className="px-6 py-8 sm:px-10 sm:py-10">
-                <header><p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#e4cd8b]">{dictionary.passportPage.republic}</p><h2 className="mt-3 text-3xl font-semibold text-[#fff0bd]">{dictionary.passportPage.travelHistory}</h2><p className="mt-2 max-w-md text-sm leading-6 text-[#f1d77f]/75">{dictionary.passportPage.travelHistoryDescription}</p></header>
-                <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2">
-                  {travelHistory.map((place, index) => (
-                    <article key={place.source} className="relative min-h-48 overflow-hidden rounded-xl border-2 border-[#f1d77f]/55 bg-[#f1d77f]/[0.08] p-5 even:rotate-1 odd:-rotate-1">
-                      <span className="text-4xl" aria-hidden="true">{place.flag}</span>
-                      <p className="mt-5 text-lg font-bold uppercase tracking-[0.06em] text-[#fff0bd]">{place.destination}</p>
-                      <p className="mt-2 text-xs font-medium uppercase tracking-[0.12em] text-[#e4cd8b]">{formatGenre(place.source)}</p>
-                      <p className="absolute bottom-4 right-4 font-mono text-[10px] text-[#f1d77f]/65">VISA {String(index + 1).padStart(2, "0")}</p>
+                <header><p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#e4cd8b]">{dictionary.passportPage.republic}</p><h2 className="mt-2 text-3xl font-semibold text-[#fff0bd]">{dictionary.passportPage.foreignAffairs}</h2><p className="mt-1.5 max-w-md text-sm leading-5 text-[#f1d77f]/75">{dictionary.passportPage.travelHistoryDescription}</p></header>
+                {primaryDestination ? (
+                  <div className="mt-5">
+                    <article className="rounded-xl border-2 border-[#f1d77f]/55 bg-[#f1d77f]/[0.08] p-4">
+                      <div className="flex items-start gap-4">
+                        <span className="text-4xl" aria-hidden="true">{primaryDestination.flag}</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#e4cd8b]">{dictionary.passportPage.primaryTerritory}</p>
+                          <p className="mt-1 text-xl font-bold uppercase tracking-[0.05em] text-[#fff0bd]">{primaryDestination.destination}</p>
+                          <p className="mt-1 text-xs font-medium uppercase tracking-[0.12em] text-[#e4cd8b]">{formatGenre(primaryDestination.source)}</p>
+                        </div>
+                        <span className="font-mono text-[10px] text-[#f1d77f]/65">VISA 01</span>
+                      </div>
+                      {primaryDestination.affinity ? (
+                        <dl className="mt-4 grid grid-cols-3 gap-3 border-t border-[#f1d77f]/25 pt-3">
+                          <div><dt className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[#e4cd8b]">{dictionary.passportPage.ambassador}</dt><dd className="mt-1 truncate text-xs font-semibold text-[#fff0bd]">{primaryDestination.affinity.ambassador}</dd></div>
+                          <div><dt className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[#e4cd8b]">{dictionary.passportPage.visaStatus}</dt><dd className="mt-1 text-xs font-semibold text-[#fff0bd]">{dictionary.passportPage.visaStatuses[getVisaStatus(primaryDestination.affinity)]}</dd></div>
+                          <div><dt className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[#e4cd8b]">{dictionary.passportPage.influence}</dt><dd className="mt-1 text-xs font-semibold text-[#fff0bd]">{dictionary.passportPage.influences[getGenreInfluence(primaryDestination.affinity)]}</dd></div>
+                        </dl>
+                      ) : null}
                     </article>
-                  ))}
-                </div>
+
+                    <div className="mt-3 space-y-2">
+                      {travelHistory.slice(1).map((place, index) => (
+                        <article key={place.source} className="grid grid-cols-[36px_1fr_auto] items-center gap-3 rounded-xl border border-[#f1d77f]/30 bg-[#081a2b]/30 px-3 py-2.5">
+                          <span className="text-2xl" aria-hidden="true">{place.flag}</span>
+                          <div className="min-w-0"><p className="truncate text-sm font-bold uppercase tracking-[0.04em] text-[#fff0bd]">{place.destination}</p><p className="mt-0.5 truncate text-[10px] text-[#e4cd8b]">{place.affinity ? `${dictionary.passportPage.ambassador}: ${place.affinity.ambassador}` : formatGenre(place.source)}</p></div>
+                          <div className="text-right"><p className="text-[10px] font-semibold text-[#fff0bd]">{place.affinity ? dictionary.passportPage.visaStatuses[getVisaStatus(place.affinity)] : `VISA ${String(index + 2).padStart(2, "0")}`}</p><p className="mt-0.5 text-[9px] uppercase tracking-[0.1em] text-[#f1d77f]/60">{place.affinity ? dictionary.passportPage.influences[getGenreInfluence(place.affinity)] : formatGenre(place.source)}</p></div>
+                        </article>
+                      ))}
+                    </div>
+
+                    {secondaryDestination ? <p className="mt-4 rounded-xl border border-dashed border-[#f1d77f]/35 px-4 py-3 text-sm leading-5 text-[#fff0bd]">{dictionary.passportPage.borderReport.replace("{primary}", primaryDestination.destination).replace("{secondary}", secondaryDestination.destination)}</p> : null}
+                  </div>
+                ) : <p className="mt-10 text-sm text-[#f1d77f]/75">{dictionary.passportPage.empty}</p>}
               </section>
 
               <section className="px-6 py-7 sm:px-10 sm:py-8">
@@ -287,7 +355,7 @@ export default async function PassportPage({
                   {data.mediumTerm.map((track, index) => (
                     <li key={track.id} className="flex items-center gap-3 rounded-xl border border-[#f1d77f]/30 bg-[#081a2b]/35 p-2">
                       <span className="w-6 text-center font-mono text-sm text-[#e4cd8b]">{index + 1}</span>
-                      <div className="relative size-14 shrink-0 overflow-hidden rounded-md bg-[#183652]">{track.album.images[0] ? <Image src={track.album.images[0].url} alt="" fill sizes="56px" className="object-cover" /> : null}</div>
+                      <div className="relative size-14 shrink-0 overflow-hidden rounded-md bg-[#183652]">{track.album.images[0] ? <Image src={track.album.images[0].url} alt="" fill sizes="56px" loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} className="object-cover" /> : null}</div>
                       <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-[#fff0bd]">{track.name}</p><p className="mt-1 truncate text-xs text-[#f1d77f]/70">{track.artists.map((artist) => artist.name).join(", ")}</p></div>
                       <a href={track.external_urls.spotify} target="_blank" rel="noreferrer" aria-label={`${dictionary.passportPage.openSpotify}: ${track.name}`} className="grid size-11 shrink-0 place-items-center rounded-full bg-[#1DB954] text-white transition hover:scale-105"><Play className="size-5 translate-x-px" fill="currentColor" strokeWidth={0} aria-hidden="true" /></a>
                     </li>

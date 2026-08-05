@@ -98,6 +98,24 @@
     "tryAgain": "Try again",
     "identityPage": "Identity page",
     "travelHistoryDescription": "Destinations stamped from your strongest listening affinities over the last six months.",
+    "foreignAffairs": "Foreign Affairs",
+    "primaryTerritory": "Primary musical territory",
+    "ambassador": "Ambassador",
+    "visaStatus": "Visa status",
+    "influence": "Influence",
+    "borderReport": "Your passport is anchored in {primary}, with a recurring diplomatic route through {secondary}.",
+    "visaStatuses": {
+      "permanentResident": "Permanent resident",
+      "frequentVisitor": "Frequent visitor",
+      "newArrival": "New arrival",
+      "returningCitizen": "Returning citizen",
+      "formerResidence": "Former residence"
+    },
+    "influences": {
+      "growing": "Growing",
+      "stable": "Stable",
+      "fading": "Fading"
+    },
     "anthemsPage": "National anthems",
     "previousPage": "Previous",
     "nextPage": "Next",
