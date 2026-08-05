@@ -19,6 +19,7 @@ import {
   type PassportData,
   SpotifyDataRateLimitError,
 } from "@/lib/spotify/data";
+import { createPassportShareToken } from "@/lib/share/passport-token";
 
 function formatGenre(genre: string) {
   if (genre.toLowerCase() === "mpb") return "MPB";
@@ -293,6 +294,19 @@ export default async function PassportPage({
   const leadingArtistFlag = getCountryFlag(
     data?.artistCountries?.[headOfState?.name.toLowerCase() ?? ""],
   );
+  const appOrigin = new URL(process.env.APP_URL ?? "http://127.0.0.1:3000").origin;
+  const passportShareToken = data ? createPassportShareToken({
+    version: 1,
+    locale,
+    name: session.profile.displayName,
+    nationality,
+    territory: primaryDestination?.destination ?? dictionary.passportPage.undisclosed,
+    headOfState: headOfState?.name ?? dictionary.passportPage.undisclosed,
+    passportNumber,
+    issueDate,
+    portraitUrl: portraitArtwork?.url ?? null,
+  }) : "";
+  const passportShareUrl = `${appOrigin}/${locale}/share/${passportShareToken}`;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -328,6 +342,13 @@ export default async function PassportPage({
               downloadAllLabel={dictionary.passportPage.downloadAllPages}
               downloadingLabel={dictionary.passportPage.downloading}
               downloadErrorLabel={dictionary.passportPage.downloadError}
+              shareInstagramLabel={dictionary.passportPage.shareInstagram}
+              shareSocialLabel={dictionary.passportPage.shareSocial}
+              shareXLabel={dictionary.passportPage.shareX}
+              shareText={dictionary.passportPage.shareText}
+              shareFallbackLabel={dictionary.passportPage.shareFallback}
+              createYoursLabel={dictionary.passportPage.createYours}
+              shareUrl={passportShareUrl}
             >
               <section className="relative h-full overflow-hidden px-6 py-7 sm:px-9 sm:py-8">
                 <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:radial-gradient(circle_at_center,#f1d77f_1px,transparent_1px)] [background-size:18px_18px]" />

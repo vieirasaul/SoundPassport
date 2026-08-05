@@ -15,6 +15,13 @@ type PassportBookletProps = {
   downloadAllLabel: string;
   downloadingLabel: string;
   downloadErrorLabel: string;
+  shareInstagramLabel: string;
+  shareSocialLabel: string;
+  shareXLabel: string;
+  shareText: string;
+  shareFallbackLabel: string;
+  createYoursLabel: string;
+  shareUrl: string;
 };
 
 const pageDuration = 10_000;
@@ -31,6 +38,13 @@ export function PassportBooklet({
   downloadAllLabel,
   downloadingLabel,
   downloadErrorLabel,
+  shareInstagramLabel,
+  shareSocialLabel,
+  shareXLabel,
+  shareText,
+  shareFallbackLabel,
+  createYoursLabel,
+  shareUrl,
 }: PassportBookletProps) {
   const pages = Children.toArray(children);
   const pageRefs = useRef<Array<HTMLDivElement | null>>([]);
@@ -38,7 +52,8 @@ export function PassportBooklet({
   const [isPlaying, setIsPlaying] = useState(true);
   const [isDocumentVisible, setIsDocumentVisible] = useState(true);
   const [timerKey, setTimerKey] = useState(0);
-  const [exportState, setExportState] = useState<"idle" | "page" | "all" | "error">("idle");
+  const [exportState, setExportState] = useState<"idle" | "page" | "all" | "share" | "error">("idle");
+  const [shareNotice, setShareNotice] = useState<string | null>(null);
 
   const selectPage = useCallback((page: number) => {
     setActivePage(page);
@@ -77,9 +92,20 @@ export function PassportBooklet({
     };
   }, []);
 
+  useEffect(() => {
+    if (!shareNotice) return;
+    const timeout = window.setTimeout(() => setShareNotice(null), 6_000);
+    return () => window.clearTimeout(timeout);
+  }, [shareNotice]);
+
   const goToPage = (page: number) => {
     selectPage(page);
     window.location.hash = `passport-page-${page + 1}`;
+  };
+
+  const selectPageManually = (page: number) => {
+    setIsPlaying(false);
+    selectPage(page);
   };
 
   const handleProgressComplete = () => {
@@ -141,8 +167,7 @@ export function PassportBooklet({
   };
 
   const exportPage = async () => {
-    if (exportState === "page" || exportState === "all") return;
-    const resumePlayback = isPlaying;
+    if (exportState === "page" || exportState === "all" || exportState === "share") return;
     setIsPlaying(false);
     setExportState("page");
     try {
@@ -151,14 +176,11 @@ export function PassportBooklet({
     } catch (error) {
       console.error("Unable to download passport page", error);
       setExportState("error");
-    } finally {
-      if (resumePlayback) setIsPlaying(true);
     }
   };
 
   const exportAllPages = async () => {
-    if (exportState === "page" || exportState === "all") return;
-    const resumePlayback = isPlaying;
+    if (exportState === "page" || exportState === "all" || exportState === "share") return;
     setIsPlaying(false);
     setExportState("all");
     try {
@@ -175,12 +197,50 @@ export function PassportBooklet({
     } catch (error) {
       console.error("Unable to download passport pages", error);
       setExportState("error");
-    } finally {
-      if (resumePlayback) setIsPlaying(true);
     }
   };
 
-  const isExporting = exportState === "page" || exportState === "all";
+  const shareToInstagram = async () => {
+    if (exportState === "page" || exportState === "all" || exportState === "share") return;
+    setIsPlaying(false);
+    setShareNotice(null);
+    setExportState("share");
+
+    try {
+      const image = await capturePage(activePage);
+      const file = new File([image], `soundpassport-page-${activePage + 1}.png`, { type: "image/png" });
+      const shareData = { files: [file], title: "SoundPassport", text: shareText };
+      const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+      if (isMobileDevice && navigator.share && navigator.canShare?.(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        saveBlob(image, file.name);
+        setShareNotice(shareFallbackLabel);
+      }
+      setExportState("idle");
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        setExportState("idle");
+      } else {
+        console.error("Unable to share passport page", error);
+        setExportState("error");
+      }
+    }
+  };
+
+  const shareOnX = () => {
+    if (exportState === "page" || exportState === "all" || exportState === "share") return;
+    const postText = `${shareText}\n\n${createYoursLabel}`;
+    setIsPlaying(false);
+    setShareNotice(null);
+    const xIntent = new URL("https://twitter.com/intent/tweet");
+    xIntent.searchParams.set("text", postText);
+    xIntent.searchParams.set("url", shareUrl);
+    window.open(xIntent, "soundpassport-x-share", "popup,width=640,height=520,noopener,noreferrer");
+  };
+
+  const isExporting = exportState === "page" || exportState === "all" || exportState === "share";
 
   return (
     <div className="passport-booklet mx-auto grid max-w-[620px] [perspective:1800px]">
@@ -199,6 +259,43 @@ export function PassportBooklet({
             </div>
           </div>
 
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-2.5" aria-label={shareSocialLabel}>
+            <span className="mr-1 text-xs font-semibold text-muted">{shareSocialLabel}</span>
+            <button
+              type="button"
+              onClick={shareToInstagram}
+              disabled={isExporting}
+              className="group relative inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-[radial-gradient(circle_at_20%_130%,#fdf497_0%,#fd5949_36%,#d6249f_62%,#285aeb_100%)] px-4 text-xs font-bold text-white shadow-[0_7px_20px_rgba(214,36,159,0.3)] transition duration-200 hover:scale-[1.03] hover:shadow-[0_9px_24px_rgba(214,36,159,0.4)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d6249f] disabled:cursor-wait disabled:opacity-50"
+            >
+              <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="5" />
+                <circle cx="12" cy="12" r="4" />
+                <circle cx="17.4" cy="6.7" r="1" fill="currentColor" stroke="none" />
+              </svg>
+              {exportState === "share" ? downloadingLabel : shareInstagramLabel}
+            </button>
+            <button
+              type="button"
+              onClick={shareOnX}
+              disabled={isExporting}
+              className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-black px-4 text-xs font-bold text-white shadow-sm transition hover:scale-[1.03] hover:bg-[#222] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:cursor-wait disabled:opacity-50"
+            >
+              <span className="text-base leading-none" aria-hidden="true">𝕏</span>
+              {shareXLabel}
+            </button>
+            <button
+              type="button"
+              onClick={exportPage}
+              disabled={isExporting}
+              className="group relative grid size-10 cursor-pointer place-items-center rounded-full border border-black/[0.09] bg-white text-ink shadow-sm transition hover:border-black/[0.18] hover:bg-black/[0.02] disabled:cursor-wait disabled:opacity-50"
+              aria-label={downloadPageLabel}
+              title={downloadPageLabel}
+            >
+              <Download className="size-4" aria-hidden="true" />
+              <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[#111827] px-2.5 py-1.5 text-[11px] font-semibold text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">{downloadPageLabel}</span>
+            </button>
+          </div>
+
           <div className="mt-3 h-1 overflow-hidden rounded-full bg-black/[0.08]" aria-label={`${progressLabel}: ${page + 1}`}>
             <div
               key={`${page}-${timerKey}`}
@@ -215,23 +312,10 @@ export function PassportBooklet({
             {page === 0 ? (
               <span className="rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-sm font-semibold text-ink opacity-35">← {previousLabel}</span>
             ) : (
-              <a href={`#passport-page-${page}`} onClick={() => selectPage(page - 1)} className="rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-sm font-semibold text-ink shadow-sm transition hover:border-black/[0.16]">← {previousLabel}</a>
+              <a href={`#passport-page-${page}`} onClick={() => selectPageManually(page - 1)} className="rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-sm font-semibold text-ink shadow-sm transition hover:border-black/[0.16]">← {previousLabel}</a>
             )}
 
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={exportPage}
-                disabled={isExporting}
-                aria-label={exportState === "page" ? downloadingLabel : downloadPageLabel}
-                title={downloadPageLabel}
-                className="group relative grid size-8 cursor-pointer place-items-center rounded-full border border-black/[0.09] bg-white text-ink shadow-sm transition hover:border-black/[0.16] hover:bg-black/[0.02] disabled:cursor-wait disabled:opacity-50"
-              >
-                <Download className="size-3.5" aria-hidden="true" />
-                <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[#111827] px-2.5 py-1.5 text-[11px] font-semibold text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-                  {downloadPageLabel}
-                </span>
-              </button>
               <button
                 type="button"
                 onClick={exportAllPages}
@@ -258,22 +342,27 @@ export function PassportBooklet({
                 <a
                   key={index}
                   href={`#passport-page-${index + 1}`}
-                  onClick={() => selectPage(index)}
+                  onClick={() => selectPageManually(index)}
                   aria-label={`${pageLabel} ${index + 1}`}
                   aria-current={page === index ? "page" : undefined}
-                  className="size-2.5 rounded-full bg-black/15 transition aria-[current=page]:scale-125 aria-[current=page]:bg-[#112a42]"
+                  className="hidden size-2.5 rounded-full bg-black/15 transition aria-[current=page]:scale-125 aria-[current=page]:bg-[#112a42] sm:block"
                 />
               ))}
               <span className="ml-2 text-xs font-medium tabular-nums text-muted">{page + 1} / {pages.length}</span>
-              <span className="sr-only" aria-live="polite">{isExporting ? downloadingLabel : exportState === "error" ? downloadErrorLabel : ""}</span>
+              <span className="sr-only" aria-live="polite">{isExporting ? downloadingLabel : exportState === "error" ? downloadErrorLabel : shareNotice ?? ""}</span>
             </div>
 
             {page === pages.length - 1 ? (
               <span className="rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-sm font-semibold text-ink opacity-35">{nextLabel} →</span>
             ) : (
-              <a href={`#passport-page-${page + 2}`} onClick={() => selectPage(page + 1)} className="rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-sm font-semibold text-ink shadow-sm transition hover:border-black/[0.16]">{nextLabel} →</a>
+              <a href={`#passport-page-${page + 2}`} onClick={() => selectPageManually(page + 1)} className="rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-sm font-semibold text-ink shadow-sm transition hover:border-black/[0.16]">{nextLabel} →</a>
             )}
           </nav>
+          {shareNotice ? (
+            <div className="fixed bottom-6 left-1/2 z-50 w-[min(90vw,420px)] -translate-x-1/2 rounded-xl bg-[#111827] px-4 py-3 text-center text-xs font-medium leading-5 text-white shadow-2xl" role="status">
+              {shareNotice}
+            </div>
+          ) : null}
         </section>
       ))}
     </div>

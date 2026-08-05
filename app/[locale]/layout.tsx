@@ -33,6 +33,7 @@ export async function generateMetadata({
   const dictionary = await getDictionary(locale);
 
   return {
+    metadataBase: new URL(process.env.APP_URL ?? "http://127.0.0.1:3000"),
     title: dictionary.metadata.title,
     description: dictionary.metadata.description,
     icons: {
