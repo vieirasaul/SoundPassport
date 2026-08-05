@@ -100,6 +100,18 @@ html {
   }
 }
 
+.passport-autoplay-progress {
+  width: 0;
+  animation-name: passport-autoplay-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes passport-autoplay-progress {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
 .passport-booklet-sheet-initial .passport-signature,
 .passport-booklet-sheet:target .passport-signature {
   animation: passport-signature-write 1.9s cubic-bezier(0.3, 0.08, 0.18, 1) 240ms both;
@@ -211,6 +223,7 @@ html {
   .passport-booklet-sheet:target .passport-signature::after {
     animation: none;
   }
+
 }
 
 @theme inline {

@@ -321,6 +321,9 @@ export default async function PassportPage({
               previousLabel={dictionary.passportPage.previousPage}
               nextLabel={dictionary.passportPage.nextPage}
               pageLabel={dictionary.passportPage.page}
+              playLabel={dictionary.passportPage.playPassport}
+              pauseLabel={dictionary.passportPage.pausePassport}
+              progressLabel={dictionary.passportPage.pageProgress}
             >
               <section className="relative h-full overflow-hidden px-6 py-7 sm:px-9 sm:py-8">
                 <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:radial-gradient(circle_at_center,#f1d77f_1px,transparent_1px)] [background-size:18px_18px]" />
@@ -440,7 +443,7 @@ export default async function PassportPage({
               </section>
 
               <section className="px-6 py-7 sm:px-10 sm:py-8">
-                <header><p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#e4cd8b]">{dictionary.passportPage.republic}</p><h2 className="mt-3 text-3xl font-semibold text-[#fff0bd]">{dictionary.passportPage.anthemsPage}</h2><p className="mt-2 text-sm leading-6 text-[#f1d77f]/75">{dictionary.passportPage.mediumTermDescription}</p></header>
+                <header><p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#e4cd8b]">{dictionary.passportPage.republic}</p><h2 className="mt-3 text-3xl font-semibold text-[#fff0bd]">{dictionary.passportPage.anthemsPage}</h2><p className="mt-2 text-xs leading-5 text-[#f1d77f]/75">{dictionary.passportPage.mediumTermDescription}</p></header>
                 <ol className="mt-6 space-y-2">
                   {data.mediumTerm.map((track, index) => (
                     <li key={track.id} className="flex items-center gap-3 rounded-xl border border-[#f1d77f]/30 bg-[#081a2b]/35 p-2">
