@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { ArtistSeal } from "@/components/artist-seal";
 import { PassportBooklet } from "@/components/passport-booklet";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { isLocale } from "@/i18n/config";
@@ -38,6 +39,14 @@ function getGenreFlag(genre: string) {
   if (normalized.includes("k-pop") || normalized.includes("korean")) return "🇰🇷";
   if (normalized.includes("latin") || normalized.includes("reggaeton")) return "🇵🇷";
   return "🌍";
+}
+
+function getCountryFlag(countryCode: string | undefined) {
+  if (!countryCode || !/^[A-Z]{2}$/.test(countryCode)) return "🌍";
+
+  return String.fromCodePoint(
+    ...[...countryCode].map((character) => 127397 + character.charCodeAt(0)),
+  );
 }
 
 function getGenreDestination(genre: string) {
@@ -84,16 +93,15 @@ function getArtistDestination(artist: string, index: number) {
   return destinations[index % destinations.length];
 }
 
-function getMusicNationality(genres: string[]) {
+function getMusicNationalityCategory(genres: string[]) {
   const strongestGenre = genres[0]?.toLowerCase() ?? "";
-  if (strongestGenre.includes("metal")) return "Metalhead";
-  if (strongestGenre.includes("punk") || strongestGenre.includes("hardcore")) return "Punk Native";
-  if (strongestGenre.includes("rock")) return "Rock Citizen";
-  if (strongestGenre.includes("pop")) return "Pop Native";
-  if (strongestGenre.includes("hip hop") || strongestGenre.includes("rap")) return "Beat Dweller";
-  if (strongestGenre.includes("electronic") || strongestGenre.includes("techno")) return "Electronic Voyager";
-  if (strongestGenre) return `${formatGenre(genres[0])} Native`;
-  return "Citizen of Music";
+  if (strongestGenre.includes("metal")) return "metal" as const;
+  if (strongestGenre.includes("punk") || strongestGenre.includes("hardcore")) return "punk" as const;
+  if (strongestGenre.includes("rock")) return "rock" as const;
+  if (strongestGenre.includes("pop")) return "pop" as const;
+  if (strongestGenre.includes("hip hop") || strongestGenre.includes("rap")) return "hipHop" as const;
+  if (strongestGenre.includes("electronic") || strongestGenre.includes("techno")) return "electronic" as const;
+  return "music" as const;
 }
 
 function getArtistOfficeCategory(genres: string[]) {
@@ -109,38 +117,6 @@ function getArtistOfficeCategory(genres: string[]) {
   return "default";
 }
 
-function getArtistTermPresence(data: PassportData, artistId: string) {
-  return [
-    data.shortTermArtists.some((artist) => artist.id === artistId),
-    data.mediumTermArtists.some((artist) => artist.id === artistId),
-    data.longTermArtists.some((artist) => artist.id === artistId),
-  ].filter(Boolean).length;
-}
-
-function getVisaStatus(affinity: PassportData["genreAffinities"][number]) {
-  if (
-    affinity.shortTermScore > 0 &&
-    affinity.mediumTermScore === 0 &&
-    affinity.longTermScore === 0
-  ) return "newArrival" as const;
-  if (
-    affinity.shortTermScore > 0 &&
-    affinity.mediumTermScore === 0 &&
-    affinity.longTermScore > 0
-  ) return "returningCitizen" as const;
-  if (affinity.periods === 3) return "permanentResident" as const;
-  if (affinity.longTermScore > 0 && affinity.shortTermScore === 0) {
-    return "formerResidence" as const;
-  }
-  return "frequentVisitor" as const;
-}
-
-function getGenreInfluence(affinity: PassportData["genreAffinities"][number]) {
-  if (affinity.shortTermScore > affinity.longTermScore + 2) return "growing" as const;
-  if (affinity.longTermScore > affinity.shortTermScore + 2) return "fading" as const;
-  return "stable" as const;
-}
-
 function formatRetryDuration(seconds: number, locale: string) {
   const unit = seconds >= 3600 ? "hour" : seconds >= 60 ? "minute" : "second";
   const divisor = unit === "hour" ? 3600 : unit === "minute" ? 60 : 1;
@@ -151,6 +127,16 @@ function formatRetryDuration(seconds: number, locale: string) {
     unitDisplay: "long",
     maximumFractionDigits: 0,
   }).format(Math.ceil(seconds / divisor));
+}
+
+function toMachineReadable(value: string, length: number) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "<")
+    .padEnd(length, "<")
+    .slice(0, length);
 }
 
 export default async function PassportPage({
@@ -205,7 +191,9 @@ export default async function PassportPage({
     .map((affinity) => ({
       source: affinity.genre,
       destination: getGenreDestination(affinity.genre),
-      flag: getGenreFlag(affinity.genre),
+      flag: getCountryFlag(
+        data?.artistCountries?.[affinity.ambassador.toLowerCase()],
+      ),
       affinity,
     }))
     .filter(
@@ -238,24 +226,44 @@ export default async function PassportPage({
         flag: "🎵",
         affinity: null,
       }));
-  const nationality = getMusicNationality(validTopGenres);
+  const nationality = dictionary.passportPage.nationalities[
+    getMusicNationalityCategory(validTopGenres)
+  ];
   const portraitArtwork = data?.longTerm[0]?.album.images[0];
   const headOfState = data?.headOfState ?? null;
   const headOfStateProfile = data?.headOfStateProfile ?? null;
   const headOfStateTrack = data?.mediumTerm.find((track) =>
     track.artists.some((artist) => artist.name === headOfState?.name),
   );
-  const termPresence = headOfState && data
-    ? getArtistTermPresence(data, headOfState.id)
-    : 0;
-  const headOfStateGenres = (headOfState?.genres ?? []).filter(
+  const spotifyHeadOfStateGenres = (headOfState?.genres ?? []).filter(
     (genre): genre is string => typeof genre === "string" && genre.length > 0,
   );
+  const headOfStateGenres = spotifyHeadOfStateGenres.length
+    ? spotifyHeadOfStateGenres
+    : data?.artistGenres?.[headOfState?.name.toLowerCase() ?? ""] ?? [];
   const artistOffice = headOfState
     ? dictionary.passportPage.artistOffices[getArtistOfficeCategory(headOfStateGenres)]
     : "";
   const primaryDestination = travelHistory[0];
   const secondaryDestination = travelHistory[1];
+  const listenerClass = dictionary.passportPage.verified;
+  const machineReadableName = toMachineReadable(
+    `SP MUSIC ${session.profile.displayName}`,
+    42,
+  );
+  const machineReadableIdentity = toMachineReadable(
+    `${passportNumber} ${nationality} ${dictionary.passportPage.validUntilValue}`,
+    42,
+  );
+  const highCouncil = (data?.mediumTermArtists ?? []).slice(0, 3).map((artist, index) => ({
+    artist,
+    office: dictionary.passportPage.artistOffices[getArtistOfficeCategory(
+      artist.genres?.length
+        ? artist.genres
+        : data?.artistGenres?.[artist.name.toLowerCase()] ?? [],
+    )],
+    rank: index + 1,
+  }));
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -285,30 +293,78 @@ export default async function PassportPage({
               nextLabel={dictionary.passportPage.nextPage}
               pageLabel={dictionary.passportPage.page}
             >
-              <section className="px-6 py-8 sm:px-9 sm:py-10">
-                <header className="text-center">
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#f1d77f]/90">{dictionary.passportPage.republic}</p>
-                  <div className="mx-auto mt-4 grid size-20 place-items-center rounded-full border-2 border-[#f1d77f]/85 text-4xl">♫</div>
-                  <h1 className="mt-4 text-2xl font-semibold uppercase tracking-[0.22em] sm:text-3xl">{dictionary.passportPage.document}</h1>
-                  <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#e4cd8b]">{dictionary.passportPage.identityPage}</p>
-                </header>
-                <div className="mt-7 grid grid-cols-[112px_1fr] gap-5 border-t border-dashed border-[#f1d77f]/50 pt-7 sm:grid-cols-[150px_1fr] sm:gap-8">
-                  <div>
-                    <div className="relative aspect-square overflow-hidden rounded-lg border border-[#f1d77f]/50 bg-[#183652]">
-                      {portraitArtwork ? <Image src={portraitArtwork.url} alt="" fill sizes="150px" loading="eager" fetchPriority="high" className="object-cover opacity-90" /> : <div className="grid h-full place-items-center text-4xl">♫</div>}
+              <section className="relative overflow-hidden px-6 py-7 sm:px-9 sm:py-8">
+                <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:radial-gradient(circle_at_center,#f1d77f_1px,transparent_1px)] [background-size:18px_18px]" />
+                <div className="relative">
+                  <header className="flex items-center justify-between border-b border-[#f1d77f]/40 pb-4">
+                    <div><p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#e4cd8b]">{dictionary.passportPage.republic}</p><h1 className="mt-1 text-3xl font-semibold uppercase tracking-[0.18em] text-[#fff0bd]">{dictionary.passportPage.document}</h1><p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#e4cd8b]">{dictionary.passportPage.officialIdentityRecord}</p></div>
+                    <div className="grid size-14 place-items-center rounded-full border-2 border-[#f1d77f]/75 text-2xl shadow-[inset_0_0_0_4px_rgba(241,215,127,0.08)]">♫</div>
+                  </header>
+
+                  <div className="mt-5 grid grid-cols-[112px_1fr] gap-5 sm:grid-cols-[140px_1fr] sm:gap-7">
+                    <div>
+                      <div className="relative aspect-square overflow-hidden rounded-lg border border-[#f1d77f]/60 bg-[#183652]">
+                        {portraitArtwork ? <Image src={portraitArtwork.url} alt="" fill sizes="140px" loading="eager" fetchPriority="high" className="object-cover opacity-90" /> : <div className="grid h-full place-items-center text-4xl">♫</div>}
+                        <span className="absolute bottom-2 right-2 rotate-[-7deg] rounded border border-[#fff0bd]/70 bg-[#112a42]/80 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.1em] text-[#fff0bd]">{dictionary.passportPage.verified}</span>
+                      </div>
+                      <p className="mt-1.5 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-[#e4cd8b]">{dictionary.passportPage.musicalPortrait}</p>
+                      <p className="mt-2 border-b border-[#f1d77f]/35 pb-1 text-center text-base italic text-[#fff0bd]">{session.profile.displayName}</p>
+                      <p className="mt-1 text-center text-[9px] uppercase tracking-[0.12em] text-[#e4cd8b]">{dictionary.passportPage.listenerSignature}</p>
                     </div>
-                    <p className="mt-2 text-center font-mono text-[10px] tracking-[0.08em] text-[#f1d77f]/85">{passportNumber}</p>
+                    <dl className="grid grid-cols-2 content-start gap-x-4 gap-y-4">
+                      <div className="col-span-2"><dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.citizen}</dt><dd className="mt-1 text-2xl font-semibold text-[#fff0bd] sm:text-[28px]">{session.profile.displayName}</dd></div>
+                      <div><dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.nationality}</dt><dd className="mt-1 text-base font-semibold text-[#fff0bd]">{nationality}</dd></div>
+                      <div><dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.listenerClass}</dt><dd className="mt-1 text-base font-semibold text-[#fff0bd]">{listenerClass}</dd></div>
+                      <div><dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.documentType}</dt><dd className="mt-1 text-base font-semibold text-[#fff0bd]">{dictionary.passportPage.documentTypeValue}</dd></div>
+                      <div><dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.passportNumber}</dt><dd className="mt-1 text-base font-semibold text-[#fff0bd]">{passportNumber}</dd></div>
+                      <div><dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.issued}</dt><dd className="mt-1 text-base font-semibold text-[#fff0bd]">{issueDate}</dd></div>
+                      <div><dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.validUntil}</dt><dd className="mt-1 text-base font-semibold text-[#fff0bd]">{dictionary.passportPage.validUntilValue}</dd></div>
+                    </dl>
                   </div>
-                  <dl className="grid grid-cols-2 gap-x-4 gap-y-5">
-                    <div className="col-span-2"><dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.citizen}</dt><dd className="mt-1 text-xl font-semibold text-[#fff0bd] sm:text-2xl">{session.profile.displayName}</dd></div>
-                    <div><dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.nationality}</dt><dd className="mt-1 text-sm font-semibold text-[#fff0bd]">{nationality}</dd></div>
-                    <div><dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.documentType}</dt><dd className="mt-1 text-sm font-semibold text-[#fff0bd]">{dictionary.passportPage.documentTypeValue}</dd></div>
-                    <div><dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.issued}</dt><dd className="mt-1 text-sm font-semibold text-[#fff0bd]">{issueDate}</dd></div>
-                    <div><dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.validUntil}</dt><dd className="mt-1 text-sm font-semibold text-[#fff0bd]">{dictionary.passportPage.validUntilValue}</dd></div>
+
+                  <dl className="mt-5 grid grid-cols-3 gap-4 border-y border-[#f1d77f]/30 py-4">
+                    <div><dt className="text-[10px] font-semibold uppercase tracking-[0.13em] text-[#e4cd8b]">{dictionary.passportPage.primaryTerritory}</dt><dd className="mt-1 truncate text-sm font-semibold text-[#fff0bd]">{primaryDestination?.destination ?? dictionary.passportPage.undisclosed}</dd></div>
+                    <div><dt className="text-[10px] font-semibold uppercase tracking-[0.13em] text-[#e4cd8b]">{dictionary.passportPage.headOfState}</dt><dd className="mt-1 truncate text-sm font-semibold text-[#fff0bd]">{headOfState?.name ?? dictionary.passportPage.undisclosed}</dd></div>
+                    <div><dt className="text-[10px] font-semibold uppercase tracking-[0.13em] text-[#e4cd8b]">{dictionary.passportPage.issuingAuthority}</dt><dd className="mt-1 text-sm font-semibold text-[#fff0bd]">SoundPassport</dd></div>
                   </dl>
+
+                  <div className="mt-4 rounded-lg border border-[#f1d77f]/25 bg-[#081a2b]/45 px-3 py-2 font-mono text-[11px] leading-4 tracking-[0.08em] text-[#f1d77f]/80"><p>{machineReadableName}</p><p>{machineReadableIdentity}</p></div>
+                  <p className="mt-3 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-[#e4cd8b]">{dictionary.passportPage.identityVerified}</p>
                 </div>
-                <div className="mt-8 border-t border-[#f1d77f]/35 pt-5"><p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]">{dictionary.passportPage.officialAnthem}</p><p className="mt-1.5 text-base font-semibold text-[#fff0bd]">{data.longTerm[0] ? `${data.longTerm[0].name} · ${data.longTerm[0].artists.map((artist) => artist.name).join(", ")}` : "N/A"}</p></div>
-                <div className="mt-8 flex items-center justify-between border-t border-[#f1d77f]/35 pt-5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#e4cd8b]"><span>{dictionary.passportPage.connected}</span><span className="text-xl text-[#1DB954]">●</span></div>
+              </section>
+
+              <section className="flex h-full flex-col px-3 py-6 sm:px-8 sm:py-7">
+                <header className="text-center">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#e4cd8b]">{dictionary.passportPage.republic}</p>
+                  <h2 className="mt-2 font-serif text-3xl font-semibold uppercase tracking-[0.08em] text-[#fff0bd]">{dictionary.passportPage.highCouncil}</h2>
+                  <p className="mx-auto mt-1.5 max-w-md text-sm leading-5 text-[#f1d77f]/75">{dictionary.passportPage.highCouncilDescription}</p>
+                </header>
+
+                {highCouncil.length ? (
+                  <div className="mt-5 flex flex-1 flex-col items-center">
+                    <ArtistSeal
+                      artist={{ id: highCouncil[0].artist.id, name: highCouncil[0].artist.name, imageUrl: highCouncil[0].artist.images[0]?.url ?? null, spotifyUrl: highCouncil[0].artist.external_urls.spotify }}
+                      office={highCouncil[0].office}
+                      rank={highCouncil[0].rank}
+                      openLabel={dictionary.passportPage.openSpotify}
+                      featured
+                      delay={0}
+                    />
+                    <div className="mt-3 flex w-full items-start justify-center gap-2.5 sm:gap-7">
+                      {highCouncil.slice(1).map((member, index) => (
+                        <ArtistSeal
+                          key={member.artist.id}
+                          artist={{ id: member.artist.id, name: member.artist.name, imageUrl: member.artist.images[0]?.url ?? null, spotifyUrl: member.artist.external_urls.spotify }}
+                          office={member.office}
+                          rank={member.rank}
+                          openLabel={dictionary.passportPage.openSpotify}
+                          delay={(index + 1) * 140}
+                        />
+                      ))}
+                    </div>
+                    <p className="mt-auto pb-1 text-center text-[10px] font-semibold uppercase leading-4 tracking-[0.1em] text-[#e4cd8b]">{dictionary.passportPage.councilPeriodLegend}</p>
+                  </div>
+                ) : <p className="mt-10 text-sm text-[#f1d77f]/75">{dictionary.passportPage.empty}</p>}
               </section>
 
               <section className="px-6 py-8 sm:px-10 sm:py-10">
@@ -323,13 +379,11 @@ export default async function PassportPage({
                           <p className="mt-1 text-xl font-bold uppercase tracking-[0.05em] text-[#fff0bd]">{primaryDestination.destination}</p>
                           <p className="mt-1 text-xs font-medium uppercase tracking-[0.12em] text-[#e4cd8b]">{formatGenre(primaryDestination.source)}</p>
                         </div>
-                        <span className="font-mono text-[10px] text-[#f1d77f]/65">VISA 01</span>
+                        <span className="font-mono text-[10px] text-[#f1d77f]/65">{dictionary.passportPage.entry} 01</span>
                       </div>
                       {primaryDestination.affinity ? (
-                        <dl className="mt-4 grid grid-cols-3 gap-3 border-t border-[#f1d77f]/25 pt-3">
+                        <dl className="mt-4 border-t border-[#f1d77f]/25 pt-3">
                           <div><dt className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[#e4cd8b]">{dictionary.passportPage.ambassador}</dt><dd className="mt-1 truncate text-xs font-semibold text-[#fff0bd]">{primaryDestination.affinity.ambassador}</dd></div>
-                          <div><dt className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[#e4cd8b]">{dictionary.passportPage.visaStatus}</dt><dd className="mt-1 text-xs font-semibold text-[#fff0bd]">{dictionary.passportPage.visaStatuses[getVisaStatus(primaryDestination.affinity)]}</dd></div>
-                          <div><dt className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[#e4cd8b]">{dictionary.passportPage.influence}</dt><dd className="mt-1 text-xs font-semibold text-[#fff0bd]">{dictionary.passportPage.influences[getGenreInfluence(primaryDestination.affinity)]}</dd></div>
                         </dl>
                       ) : null}
                     </article>
@@ -339,7 +393,7 @@ export default async function PassportPage({
                         <article key={place.source} className="grid grid-cols-[36px_1fr_auto] items-center gap-3 rounded-xl border border-[#f1d77f]/30 bg-[#081a2b]/30 px-3 py-2.5">
                           <span className="text-2xl" aria-hidden="true">{place.flag}</span>
                           <div className="min-w-0"><p className="truncate text-sm font-bold uppercase tracking-[0.04em] text-[#fff0bd]">{place.destination}</p><p className="mt-0.5 truncate text-[10px] text-[#e4cd8b]">{place.affinity ? `${dictionary.passportPage.ambassador}: ${place.affinity.ambassador}` : formatGenre(place.source)}</p></div>
-                          <div className="text-right"><p className="text-[10px] font-semibold text-[#fff0bd]">{place.affinity ? dictionary.passportPage.visaStatuses[getVisaStatus(place.affinity)] : `VISA ${String(index + 2).padStart(2, "0")}`}</p><p className="mt-0.5 text-[9px] uppercase tracking-[0.1em] text-[#f1d77f]/60">{place.affinity ? dictionary.passportPage.influences[getGenreInfluence(place.affinity)] : formatGenre(place.source)}</p></div>
+                          <p className="text-right font-mono text-[9px] uppercase tracking-[0.1em] text-[#f1d77f]/65">{dictionary.passportPage.entry} {String(index + 2).padStart(2, "0")}</p>
                         </article>
                       ))}
                     </div>
@@ -386,9 +440,6 @@ export default async function PassportPage({
                         <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#e4cd8b]">{dictionary.passportPage.currentAdministration}</p>
                         <h3 className="mt-2 text-2xl font-bold leading-tight text-[#fff0bd] sm:text-3xl">{headOfState.name}</h3>
                         <p className="mt-3 text-sm font-semibold leading-5 text-[#f1d77f]">{artistOffice}</p>
-                        <p className="mt-4 inline-flex rounded-full border border-[#f1d77f]/40 bg-[#f1d77f]/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#fff0bd]">
-                          {dictionary.passportPage.termPresence.replace("{count}", String(termPresence))}
-                        </p>
                       </div>
                     </div>
 
@@ -406,6 +457,7 @@ export default async function PassportPage({
                   </div>
                 ) : <p className="mt-10 text-sm text-[#f1d77f]/75">{dictionary.passportPage.empty}</p>}
               </section>
+
             </PassportBooklet>
           </section>
         )}

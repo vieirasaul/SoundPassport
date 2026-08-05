@@ -150,11 +150,22 @@ async function getArtistGenres(artistNames: string[]) {
   }
 }
 
-async function getArtistProfile(artistName: string): Promise<ArtistProfile | null> {
+async function getArtistMetadata(artistNames: string[], featuredName: string | null) {
+  if (!artistNames.length) {
+    return {
+      profile: null,
+      countries: {} as Record<string, string>,
+      genres: {} as Record<string, string[]>,
+    };
+  }
+
   const parameters = new URLSearchParams({
-    query: `artist:"${artistName.replace(/["\\]/g, "\\$&")}"`,
+    query: artistNames
+      .slice(0, 8)
+      .map((name) => `artist:"${name.replace(/["\\]/g, "\\$&")}"`)
+      .join(" OR "),
     fmt: "json",
-    limit: "3",
+    limit: "20",
   });
 
   try {
@@ -165,26 +176,61 @@ async function getArtistProfile(artistName: string): Promise<ArtistProfile | nul
       next: { revalidate: 60 * 60 * 24 * 30 },
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      return {
+        profile: null,
+        countries: {} as Record<string, string>,
+        genres: {} as Record<string, string[]>,
+      };
+    }
 
     const result = (await response.json()) as MusicBrainzArtistSearch;
-    const exactMatch = result.artists?.find(
-      (artist) => artist.name.toLowerCase() === artistName.toLowerCase(),
+    const requestedNames = new Set(artistNames.map((name) => name.toLowerCase()));
+    const exactArtists = (result.artists ?? []).filter((artist) =>
+      requestedNames.has(artist.name.toLowerCase()),
     );
-    const artist = exactMatch ?? result.artists?.[0];
+    const artist = featuredName
+      ? exactArtists.find(
+          (candidate) => candidate.name.toLowerCase() === featuredName.toLowerCase(),
+        )
+      : undefined;
+    const countries: Record<string, string> = {};
+    const genres: Record<string, string[]> = {};
+    exactArtists.forEach((candidate) => {
+      const key = candidate.name.toLowerCase();
+      if (candidate.country && !countries[key]) countries[key] = candidate.country;
+      if (!genres[key]) {
+        const artistGenres = (candidate.tags ?? [])
+          .filter((tag) =>
+            supportedGenreTerms.some((term) => tag.name.toLowerCase().includes(term)),
+          )
+          .sort((a, b) => (b.count ?? 0) - (a.count ?? 0))
+          .slice(0, 5)
+          .map((tag) => tag.name.toLowerCase());
+        if (artistGenres.length) genres[key] = artistGenres;
+      }
+    });
 
-    if (!artist) return null;
+    if (!artist) return { profile: null, countries, genres };
 
     return {
-      name: artist.name,
-      type: artist.type ?? null,
-      country: artist.country ?? null,
-      area: artist["begin-area"]?.name ?? artist.area?.name ?? null,
-      activeSince: artist["life-span"]?.begin?.slice(0, 4) ?? null,
-      disambiguation: artist.disambiguation ?? null,
+      profile: {
+        name: artist.name,
+        type: artist.type ?? null,
+        country: artist.country ?? null,
+        area: artist["begin-area"]?.name ?? artist.area?.name ?? null,
+        activeSince: artist["life-span"]?.begin?.slice(0, 4) ?? null,
+        disambiguation: artist.disambiguation ?? null,
+      } satisfies ArtistProfile,
+      countries,
+      genres,
     };
   } catch {
-    return null;
+    return {
+      profile: null,
+      countries: {} as Record<string, string>,
+      genres: {} as Record<string, string[]>,
+    };
   }
 }
 
@@ -284,13 +330,18 @@ export async function getPassportData(accessToken: string) {
     ? [...new Set(spotifyGenres)].slice(0, 12)
     : await getArtistGenres(topArtistNames);
   const headOfState = mediumTermArtists.items[0] ?? null;
-  const headOfStateProfile = headOfState
-    ? await getArtistProfile(headOfState.name)
-    : null;
   const genreAffinities = buildGenreAffinities(
     shortTermArtists.items,
     mediumTermArtists.items,
     longTermArtists.items,
+  );
+  const metadataNames = Array.from(new Set([
+    ...(headOfState ? [headOfState.name] : []),
+    ...genreAffinities.slice(0, 8).map((affinity) => affinity.ambassador),
+  ]));
+  const artistMetadata = await getArtistMetadata(
+    metadataNames,
+    headOfState?.name ?? null,
   );
   const rankedGenres = genreAffinities.length
     ? genreAffinities.map((affinity) => affinity.genre)
@@ -305,7 +356,9 @@ export async function getPassportData(accessToken: string) {
     mediumTermArtists: mediumTermArtists.items,
     longTermArtists: longTermArtists.items,
     headOfState,
-    headOfStateProfile,
+    headOfStateProfile: artistMetadata.profile,
+    artistCountries: artistMetadata.countries,
+    artistGenres: artistMetadata.genres,
     genreAffinities,
   };
 }
@@ -333,7 +386,7 @@ globalPassportCache.soundPassportRequests = passportRequests;
 
 const freshLifetime = 12 * 60 * 60 * 1000;
 const staleLifetime = 7 * 24 * 60 * 60 * 1000;
-const passportDataVersion = "v3";
+const passportDataVersion = "v5";
 
 export async function getCachedPassportData(
   accountId: string,
