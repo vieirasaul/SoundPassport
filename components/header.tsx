@@ -23,7 +23,7 @@ export function Header({ locale, navigation, currentPath }: HeaderProps) {
   return (
     <header className="border-b border-black/[0.06]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between sm:h-20">
+        <div className="flex h-16 items-center sm:grid sm:h-20 sm:grid-cols-[1fr_auto_1fr]">
           <Link
             href={`/${locale}`}
             className="flex items-center gap-2.5 text-[15px] font-semibold tracking-[-0.02em] text-ink"
@@ -32,26 +32,29 @@ export function Header({ locale, navigation, currentPath }: HeaderProps) {
             <BrandLogo />
           </Link>
 
-          <div className="hidden items-center sm:flex">
-            <nav aria-label={navigation.homeLabel}>
-              <NavigationLinks
-                links={links}
-                className="flex items-center gap-1"
-              />
-            </nav>
+          <nav aria-label={navigation.homeLabel} className="hidden sm:block">
+            <NavigationLinks
+              links={links}
+              className="flex items-center gap-1"
+            />
+          </nav>
+
+          <div className="hidden justify-self-end sm:block">
             <LanguageSwitcher
               locale={locale}
               label={navigation.languageLabel}
               currentPath={currentPath}
             />
           </div>
-          <MobileMenu
-            locale={locale}
-            label={navigation.menuLabel}
-            languageLabel={navigation.languageLabel}
-            currentPath={currentPath}
-            links={links}
-          />
+          <div className="ml-auto sm:hidden">
+            <MobileMenu
+              locale={locale}
+              label={navigation.menuLabel}
+              languageLabel={navigation.languageLabel}
+              currentPath={currentPath}
+              links={links}
+            />
+          </div>
         </div>
       </div>
     </header>
